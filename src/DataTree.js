@@ -1,163 +1,199 @@
-import React from "react";
+import React, { useState } from "react";
 
-function DataTree({ data, onPathSelect, selectedPath, onDataChange }) {
-  const addDefaultChild = (node, path) => {
-    const updated = structuredClone(data);
-    let ref = updated;
-    for (const key of path) {
-      ref = ref[key];
+function DataTree({ data, onDataChange }) {
+  const [selectedPath, setSelectedPath] = useState(null);
+  const [editingPath, setEditingPath] = useState(null);
+  const [editingValue, setEditingValue] = useState("");
+  const [expandedPaths, setExpandedPaths] = useState([]);
+
+  const isExpanded = (path) => expandedPaths.includes(path.join(" > "));
+
+  const toggleExpand = (path) => {
+    const pathKey = path.join(" > ");
+    setExpandedPaths((prev) =>
+      prev.includes(pathKey)
+        ? prev.filter((p) => p !== pathKey)
+        : [...prev, pathKey]
+    );
+  };
+
+  const handlePathSelect = (path) => {
+    setSelectedPath(path);
+    setEditingPath(null);
+  };
+
+  const handleEditChange = (e) => {
+    setEditingValue(e.target.value);
+  };
+
+  const handleKeyEdit = (path, newKey) => {
+    const newData = { ...data };
+    let current = newData;
+    for (let i = 0; i < path.length - 1; i++) {
+      current = current[path[i]];
+    }
+    const oldKey = path[path.length - 1];
+    const value = current[oldKey];
+    delete current[oldKey];
+    current[newKey] = value;
+    onDataChange(newData);
+  };
+
+  const handleDelete = (path) => {
+    if (!window.confirm("Bu öğeyi silmek istediğinize emin misiniz?")) return;
+    const newData = { ...data };
+    let current = newData;
+    for (let i = 0; i < path.length - 1; i++) {
+      current = current[path[i]];
+    }
+    const keyToDelete = path[path.length - 1];
+    delete current[keyToDelete];
+    onDataChange(newData);
+  };
+
+  const handleAdd = (path) => {
+    const newData = { ...data };
+    let current = newData;
+    for (let key of path) {
+      if (!current[key]) current[key] = {};
+      current = current[key];
     }
 
     const level = path.length;
-    if (level === 0) {
-      // Ülke düzeyi
-      let newKey = "Yeni Ülke";
-      let counter = 1;
-      while (ref[newKey]) newKey = `Yeni Ülke ${counter++}`;
-      ref[newKey] = {
-        "Yeni Okul": {
-          "Yeni Şehir": {
+    const defaultKeys = [
+      "Yeni Ülke",
+      "Yeni Okul",
+      "Yeni Şehir",
+      "Yeni Program"
+    ];
+    const defaultKey = defaultKeys[level] || "Yeni Alan";
+
+    const uniqueKey = Object.keys(current).includes(defaultKey)
+      ? `${defaultKey} ${Object.keys(current).length + 1}`
+      : defaultKey;
+
+    current[uniqueKey] =
+      level === 3
+        ? {
             paraBirimi: "birim",
-            ekHizmetler: [{ isim: "örnek hizmet", ucret: 0 }],
+            ekHizmetler: [{ isim: "Ek hizmet", ucret: 0 }],
             programlar: {
               "Yeni Program": {
-                ucretAraliklari: [[1, 4, 0]],
+                ucretAraliklari: [[1, 4, 200]],
                 ozelDonemler: [["2025-01-01", "2025-01-15"]],
-                ozelDonemEkUcret: 0,
+                ozelDonemEkUcret: 50,
                 konaklamalar: {
-                  "Örnek Konaklama": [[1, 4, 0]]
+                  "Aile Yanı": [[1, 4, 220]],
+                  "Yurt": [[1, 4, 240]]
                 }
               }
             }
           }
-        }
-      };
-    } else if (level === 1) {
-      // Okul düzeyi
-      let newKey = "Yeni Okul";
-      let counter = 1;
-      while (ref[newKey]) newKey = `Yeni Okul ${counter++}`;
-      ref[newKey] = {
-        "Yeni Şehir": {
-          paraBirimi: "birim",
-          ekHizmetler: [{ isim: "örnek hizmet", ucret: 0 }],
-          programlar: {
-            "Yeni Program": {
-              ucretAraliklari: [[1, 4, 0]],
-              ozelDonemler: [["2025-01-01", "2025-01-15"]],
-              ozelDonemEkUcret: 0,
-              konaklamalar: {
-                "Örnek Konaklama": [[1, 4, 0]]
-              }
-            }
-          }
-        }
-      };
-    } else if (level === 2) {
-      // Şehir düzeyi
-      let newKey = "Yeni Şehir";
-      let counter = 1;
-      while (ref[newKey]) newKey = `Yeni Şehir ${counter++}`;
-      ref[newKey] = {
-        paraBirimi: "birim",
-        ekHizmetler: [{ isim: "örnek hizmet", ucret: 0 }],
-        programlar: {
-          "Yeni Program": {
-            ucretAraliklari: [[1, 4, 0]],
-            ozelDonemler: [["2025-01-01", "2025-01-15"]],
-            ozelDonemEkUcret: 0,
-            konaklamalar: {
-              "Örnek Konaklama": [[1, 4, 0]]
-            }
-          }
-        }
-      };
-    } else if (level === 3) {
-      // Program düzeyi
-      let newKey = "Yeni Program";
-      let counter = 1;
-      while (ref.programlar[newKey]) newKey = `Yeni Program ${counter++}`;
-      ref.programlar[newKey] = {
-        ucretAraliklari: [[1, 4, 0]],
-        ozelDonemler: [["2025-01-01", "2025-01-15"]],
-        ozelDonemEkUcret: 0,
-        konaklamalar: {
-          "Örnek Konaklama": [[1, 4, 0]]
-        }
-      };
-    }
+        : {};
 
-    onDataChange(updated);
+    onDataChange(newData);
+    setExpandedPaths((prev) => [...prev, path.join(" > ")]);
   };
 
-  const renderTree = (node, path = []) => {
-    if (typeof node !== "object" || node === null) return null;
-
-    return Object.entries(node).map(([key, child]) => {
+  const renderTree = (obj, path = []) => {
+    return Object.entries(obj).map(([key, value]) => {
       const newPath = [...path, key];
-      const isSelected = JSON.stringify(selectedPath) === JSON.stringify(newPath);
+      const isBranch =
+        typeof value === "object" && value !== null && !Array.isArray(value);
 
       return (
-        <li key={key}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+        <div
+          key={newPath.join(" > ")}
+          style={{ marginLeft: path.length * 15, marginBottom: "5px" }}
+        >
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}
+          >
             <div
-              style={{ cursor: "pointer", fontWeight: "bold", color: "#c24a00", flexGrow: 1 }}
-              onClick={() => onPathSelect(newPath)}
-              title="Tıklayarak düzenle"
+              style={{
+                cursor: "pointer",
+                fontWeight: "bold",
+                color: "#c24a00",
+                flexGrow: 1
+              }}
+              onClick={() => {
+                toggleExpand(newPath);
+                handlePathSelect(newPath);
+              }}
             >
-              {isSelected ? "▾" : "▸"} {key}
+              {isBranch ? (isExpanded(newPath) ? "▾" : "▸") : "•"}{" "}
+              {editingPath &&
+              editingPath.join(" > ") === newPath.join(" > ") ? (
+                <input
+                  type="text"
+                  value={editingValue}
+                  onChange={handleEditChange}
+                  onBlur={() => {
+                    handleKeyEdit(newPath, editingValue);
+                    setEditingPath(null);
+                  }}
+                  autoFocus
+                  style={{ fontSize: "0.9rem", padding: "2px 6px" }}
+                />
+              ) : (
+                key
+              )}
             </div>
 
-            <button
-              onClick={() => addDefaultChild(data, newPath)}
-              title="Alt grup ekle"
-              style={{ fontWeight: "bold", cursor: "pointer" }}
-            >
-              ＋
-            </button>
+            {isBranch && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAdd(newPath);
+                  }}
+                  title="Alt eleman ekle"
+                >
+                  ＋
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(newPath);
+                  }}
+                  title="Bu öğeyi sil"
+                >
+                  ✖
+                </button>
+              </>
+            )}
 
             <button
-              onClick={() => {
-                const confirmed = window.confirm("Bu öğeyi silmek istediğinizden emin misiniz?");
-                if (!confirmed) return;
-
-                const updated = structuredClone(data);
-                let ref = updated;
-                for (let i = 0; i < newPath.length - 1; i++) {
-                  ref = ref[newPath[i]];
-                }
-                delete ref[newPath[newPath.length - 1]];
-                onDataChange(updated);
-                if (isSelected) onPathSelect([]);
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditingPath(newPath);
+                setEditingValue(key);
               }}
-              title="Bu öğeyi sil"
-              style={{ fontWeight: "bold", cursor: "pointer" }}
+              title="Adı değiştir"
             >
-              ✖
+              ✏
             </button>
           </div>
 
-          {typeof child === "object" && (
-            <ul style={{ paddingLeft: "1.2rem" }}>{renderTree(child, newPath)}</ul>
+          {isBranch && isExpanded(newPath) && (
+            <div>{renderTree(value, newPath)}</div>
           )}
-        </li>
+        </div>
       );
     });
   };
 
   return (
-    <div className="card">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3>Veri Yapısı</h3>
-        <button
-          onClick={() => addDefaultChild(data, [])}
-          title="Yeni ülke ekle"
-          style={{ fontWeight: "bold", padding: "0.3rem 0.6rem" }}
-        >
-          ＋ Ülke Ekle
-        </button>
-      </div>
-      <ul>{renderTree(data)}</ul>
+    <div style={{ marginTop: "1rem", marginLeft: "1rem" }}>
+      <h3 style={{ color: "#7a3e00" }}>📁 Veri Yapısı</h3>
+      <button
+        onClick={() => handleAdd([])}
+        style={{ marginBottom: "10px" }}
+        title="Yeni ülke ekle"
+      >
+        + Ülke Ekle
+      </button>
+      {renderTree(data)}
     </div>
   );
 }
