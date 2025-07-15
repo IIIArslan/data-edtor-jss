@@ -1,6 +1,6 @@
 import React from "react";
 
-function UploadInput({ onUpload }) {
+function UploadInput({ onYukle }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -13,10 +13,10 @@ function UploadInput({ onUpload }) {
         const match = text.match(/export const genisVeri\s*=\s*(\{[\s\S]*\});?/);
         if (!match) throw new Error("Geçerli bir genisVeri yapısı bulunamadı.");
         const parsed = JSON.parse(match[1]);
-        onUpload(parsed);
+        onYukle(JSON.stringify(parsed, null, 2)); // App.js içinde tekrar eval edilecek
         alert("✔ Dosya başarıyla yüklendi.");
       } catch (err) {
-        alert("⚠ Dosya içeriği geçersiz. JSON formatında olmalı.");
+        alert("HATA: Dosya geçerli bir .js biçiminde değil veya JSON hatası içeriyor.");
       }
     };
     reader.readAsText(file);
