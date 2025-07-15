@@ -20,15 +20,8 @@ function ResetButton() {
   return (
     <button
       onClick={resetData}
-      title="LocalStorage verisini sıfırla"
-      style={{
-        padding: "0.4rem 0.8rem",
-        backgroundColor: "#dc3545",
-        color: "#fff",
-        border: "none",
-        borderRadius: "4px",
-        cursor: "pointer",
-      }}
+      title="Verileri sıfırla"
+      className="danger-button"
     >
       Sıfırla
     </button>
@@ -66,36 +59,25 @@ function App() {
     setTema((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  const handleDosyaYukle = (icerik) => {
+  const handleDosyaYukle = (jsIcerik) => {
     try {
-      const temiz = icerik.replace(/export const \w+\s*=\s*/, "").trim();
+      const temiz = jsIcerik.replace(/export const \w+\s*=\s*/, "").trim().replace(/;$/, "");
       const obj = eval("(" + temiz + ")");
       setVeri(obj);
-      alert("✔ Değişiklikler yüklendi.");
+      alert("Dosya başarıyla yüklendi.");
     } catch (err) {
-      alert("⛔ JSON formatında hata var.");
+      alert("Dosya içeriği geçerli değil veya format hatası var.");
     }
-  };
-
-  const handleIndir = () => {
-    const icerik = "export const genisVeri = " + JSON.stringify(veri, null, 2) + ";";
-    const blob = new Blob([icerik], { type: "application/javascript" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "data.js";
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   return (
     <div className="App">
       <header className="ust-bar">
-        <h2>Veri Düzenleyici</h2>
+        <h2>Veri Editörü</h2>
         <div>
           <button onClick={toggleTema} title="Tema Değiştir">🌓</button>
           <UploadInput onYukle={handleDosyaYukle} />
-          <DownloadButton onClick={handleIndir} />
+          <DownloadButton data={veri} />
         </div>
       </header>
 
