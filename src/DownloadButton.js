@@ -3,7 +3,7 @@ import React from "react";
 function DownloadButton({ data }) {
   const handleDownload = () => {
     const fileContent = `export const genisVeri = ${JSON.stringify(data, null, 2)};`;
-    const blob = new Blob([fileContent], { type: "text/javascript" });
+    const blob = new Blob([fileContent], { type: "application/javascript" });
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
@@ -17,7 +17,7 @@ function DownloadButton({ data }) {
 
   return (
     <button onClick={handleDownload} title="Güncel dosyayı indir">
-      📥 İndir
+      ⬇ İndir
     </button>
   );
 }
