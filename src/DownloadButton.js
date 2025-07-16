@@ -1,4 +1,5 @@
 import React from "react";
+import "./App.css";
 
 function DownloadButton({ veri }) {
   const handleDownload = () => {
@@ -15,8 +16,8 @@ function DownloadButton({ veri }) {
   };
 
   return (
-    <button onClick={handleDownload} className="ikon-btn" title="Veriyi İndir (.js)">
-      ⬇️
+    <button onClick={handleDownload} className="buton-indir" title="Veriyi İndir (.js)">
+      data(.js) indir
     </button>
   );
 }
