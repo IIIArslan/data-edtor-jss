@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import { Plus, Trash2, ChevronRight, ChevronDown } from "lucide-react";
+import { Plus, Trash2, ChevronRight, ChevronDown, Pencil } from "lucide-react";
 
 function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   const [expandedPaths, setExpandedPaths] = useState([]);
+  const [editingPath, setEditingPath] = useState(null);
+  const [editingValue, setEditingValue] = useState("");
 
   const toggleExpand = (yol) => {
     const yolStr = yol.join("/");
     setExpandedPaths((prev) =>
-      prev.includes(yolStr)
-        ? prev.filter((p) => p !== yolStr)
-        : [...prev, yolStr]
+      prev.includes(yolStr) ? prev.filter((p) => p !== yolStr) : [...prev, yolStr]
     );
   };
 
@@ -50,24 +50,25 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
                 ozelDonemler: [["2025-01-01", "2025-01-15"]],
                 ozelDonemEkUcret: 50,
                 konaklamalar: {
-                  "Aile Yanı": [[1, 4, 200]]
-                }
-              }
-            }
-          }
-        }
+                  "Aile Yanı": [[1, 4, 200]],
+                },
+              },
+            },
+          },
+        },
       };
     } else {
-      hedef[yeniAd] = tip === "Program"
-        ? {
-            ucretAraliklari: [[1, 4, 100]],
-            ozelDonemler: [["2025-01-01", "2025-01-15"]],
-            ozelDonemEkUcret: 50,
-            konaklamalar: {
-              "Aile Yanı": [[1, 4, 200]]
+      hedef[yeniAd] =
+        tip === "Program"
+          ? {
+              ucretAraliklari: [[1, 4, 100]],
+              ozelDonemler: [["2025-01-01", "2025-01-15"]],
+              ozelDonemEkUcret: 50,
+              konaklamalar: {
+                "Aile Yanı": [[1, 4, 200]],
+              },
             }
-          }
-        : {};
+          : {};
     }
 
     setVeri(yeniVeri);
@@ -84,41 +85,62 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
     setAktifYol([]);
   };
 
+  const handleKeyEdit = (yol, yeniKey) => {
+    const yeniVeri = { ...veri };
+    const ebeveyn = yol.slice(0, -1).reduce((o, k) => o[k], yeniVeri);
+    const eskiKey = yol[yol.length - 1];
+    if (!yeniKey || yeniKey === eskiKey) return;
+    ebeveyn[yeniKey] = ebeveyn[eskiKey];
+    delete ebeveyn[eskiKey];
+    setVeri(yeniVeri);
+    setEditingPath(null);
+  };
+
   const renderTree = (obj, yol = []) => {
     return Object.entries(obj).map(([key, val]) => {
       const yeniYol = [...yol, key];
       const isExpanded = expandedPaths.includes(yeniYol.join("/"));
       const isActive = JSON.stringify(aktifYol) === JSON.stringify(yeniYol);
       const isObject = typeof val === "object" && val !== null && !Array.isArray(val);
+      const isEditingKey = editingPath && JSON.stringify(editingPath) === JSON.stringify(yeniYol);
 
-      if (
-        arama &&
-        !yeniYol.join("/").toLowerCase().includes(arama.toLowerCase())
-      )
-        return null;
+      if (arama && !yeniYol.join("/").toLowerCase().includes(arama.toLowerCase())) return null;
 
       return (
         <div key={yeniYol.join("/")} className="veri-satir">
-          <div
-            style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}
-          >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
             <div
-              style={{
-                cursor: "pointer",
-                fontWeight: "bold",
-                color: "#c24a00",
-                flexGrow: 1
-              }}
+              style={{ cursor: "pointer", fontWeight: "bold", color: "#c24a00", flexGrow: 1 }}
               onClick={() => toggleExpand(yeniYol)}
             >
-              {isObject && (isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}{" "}
-              <span
-                onClick={() => handleSec(yeniYol)}
-                className={isActive ? "aktif-yol" : ""}
-              >
-                {key}
-              </span>
+              {isObject &&
+                (isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}{" "}
+              {isEditingKey ? (
+                <input
+                  type="text"
+                  value={editingValue}
+                  onChange={(e) => setEditingValue(e.target.value)}
+                  onBlur={() => handleKeyEdit(yeniYol, editingValue)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleKeyEdit(yeniYol, editingValue);
+                  }}
+                  autoFocus
+                  style={{ fontSize: "0.9rem", padding: "2px 6px" }}
+                />
+              ) : (
+                <span
+                  onClick={() => handleSec(yeniYol)}
+                  className={isActive ? "aktif-yol" : ""}
+                >
+                  {key}
+                </span>
+              )}
             </div>
+
+            <button onClick={() => setEditingPath(yeniYol) || setEditingValue(key)}>
+              <Pencil size={16} />
+            </button>
+
             <button className="ikon-sadece-btn" onClick={() => handleEkle(yeniYol, Object.keys(val)[0] ? "Program" : "Alt")}>
               <Plus size={16} />
             </button>
