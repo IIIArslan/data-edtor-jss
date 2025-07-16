@@ -135,7 +135,6 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
       );
     });
   };
-
   return (
     <div className="data-tree">
       <button onClick={() => handleEkle([], "Ülke")} className="ulke-ekle">
