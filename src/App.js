@@ -4,6 +4,7 @@ import EditorPanel from "./EditorPanel";
 import DownloadButton from "./DownloadButton";
 import UploadInput from "./UploadInput";
 import SearchBox from "./SearchBox";
+import { Moon, Sun } from "lucide-react";
 import "./App.css";
 
 function App() {
@@ -31,7 +32,13 @@ function App() {
       <div className="ust-bar">
         <SearchBox arama={arama} setArama={setArama} />
         <div className="ikon-grubu">
-          <button onClick={() => setTema(tema === "dark" ? "light" : "dark")}>🌙</button>
+          <button
+            onClick={() => setTema(tema === "dark" ? "light" : "dark")}
+            className="ikon-btn"
+            title="Tema Değiştir"
+          >
+            {tema === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <UploadInput setVeri={setVeri} />
           <DownloadButton veri={veri} />
         </div>
