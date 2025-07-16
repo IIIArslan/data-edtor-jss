@@ -17,17 +17,16 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   const getRenkForPath = (yol, key) => {
     const len = yol.length;
 
-    if (len === 1) return "#FFB347"; // Ülke
-    if (len === 2) return "#A3D977"; // Okul
-    if (len === 3) return "#6EC1E4"; // Şehir
+    if (len === 1) return "#F1948A"; // Ülke
+    if (len === 2) return "#58D68D"; // Okul
+    if (len === 3) return "#85C1E9"; // Şehir
 
-    if (["paraBirimi", "ekHizmetler", "programlar"].includes(key)) return "#C0C0C0"; // Sabit alanlar
+    if (["paraBirimi", "ekHizmetler", "programlar"].includes(key)) return "#FF7F7F"; // Sabit
 
     if (["ucretAraliklari", "ozelDonemler", "ozelDonemEkUcret", "konaklamalar"].includes(key))
-      return "#C8A2C8"; // Program alt başlıkları
+      return "#C8A2C8"; // Program altı
 
-    if (yol.includes("konaklamalar") && key !== "konaklamalar")
-      return "#F2E394"; // Konaklama içeriği
+    if (yol.includes("konaklamalar") && key !== "konaklamalar") return "#F2E394"; // Konaklama içeriği
 
     return "#c24a00";
   };
