@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+""import React, { useState } from "react";
 import { Plus, Trash2, ChevronRight, ChevronDown, Pencil } from "lucide-react";
 
 function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
@@ -57,6 +57,24 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
                 konaklamalar: {
                   "Aile Yanı": [[1, 4, 200]]
                 }
+              }
+            }
+          }
+        }
+      };
+    } else if (tip === "Alt" && yol.length === 1) {
+      // Yeni okul eklendiğinde otomatik şehir şablonuyla başlat
+      hedef[yeniAd] = {
+        "Yeni Şehir": {
+          paraBirimi: "birim",
+          ekHizmetler: [{ isim: "Hizmet İsmi", ucret: 0 }],
+          programlar: {
+            "Yeni Program": {
+              ucretAraliklari: [[1, 4, 100]],
+              ozelDonemler: [["2025-01-01", "2025-01-15"]],
+              ozelDonemEkUcret: 50,
+              konaklamalar: {
+                "Aile Yanı": [[1, 4, 200]]
               }
             }
           }
@@ -154,7 +172,10 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
             >
               <Pencil size={16} />
             </button>
-            <button className="ikon-sadece-btn" onClick={() => handleEkle(yeniYol, Object.keys(val)[0] ? "Program" : "Alt")}>  
+            <button
+              className="ikon-sadece-btn"
+              onClick={() => handleEkle(yeniYol, Object.keys(val)[0] ? "Program" : "Alt")}
+            >
               <Plus size={16} />
             </button>
             <button className="ikon-sadece-btn" onClick={() => handleSil(yeniYol)}>
