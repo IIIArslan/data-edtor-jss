@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 
 function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
+  const [secilenProgram, setSecilenProgram] = useState("");
+  const [secilenKonaklama, setSecilenKonaklama] = useState("");
+
   const guncelle = (yeniDeger) => {
     const yeniVeri = { ...veri };
     const hedef = aktifYol.slice(0, -1).reduce((o, k) => o[k], yeniVeri);
@@ -10,48 +13,6 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
 
   if (aktifVeri === null || aktifVeri === undefined) {
     return <div className="editor-panel">Bir öğe seçin</div>;
-  }
-
-  if (Array.isArray(aktifVeri) && Array.isArray(aktifVeri[0])) {
-    const handleArrayChange = (index, subIndex, value) => {
-      const yeni = [...aktifVeri];
-      yeni[index][subIndex] = Number(value);
-      guncelle(yeni);
-    };
-
-    const handleArrayRemove = (index) => {
-      const yeni = [...aktifVeri];
-      yeni.splice(index, 1);
-      guncelle(yeni);
-    };
-
-    const handleArrayAdd = () => {
-      guncelle([...aktifVeri, [1, 4, 0]]);
-    };
-
-    return (
-      <div className="editor-panel">
-        <label>{aktifYol.at(-1)}</label>
-        {aktifVeri.map((aralik, i) => (
-          <div key={i} className="array-row">
-            {aralik.map((v, j) => (
-              <input
-                key={j}
-                type="number"
-                value={v}
-                onChange={(e) => handleArrayChange(i, j, e.target.value)}
-              />
-            ))}
-            <button className="ikon-sadece-btn" onClick={() => handleArrayRemove(i)}>🗑️</button>
-          </div>
-        ))}
-        <button className="buton-ekle" onClick={handleArrayAdd}>+ Ekle</button>
-      </div>
-    );
-  }
-
-  if (typeof aktifVeri !== "object") {
-    return <div className="editor-panel">Düzenlenebilir veri bulunamadı</div>;
   }
 
   const handleInput = (alan, deger) => {
@@ -66,6 +27,18 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
     const yeniListe = [...aktifVeri[alan]];
     yeniListe.splice(index, 1);
     guncelle({ ...aktifVeri, [alan]: yeniListe });
+  };
+
+  const guncelleAltAlan = (kategori, alan, deger) => {
+    const yeni = { ...aktifVeri };
+    yeni.programlar[secilenProgram][alan] = deger;
+    guncelle(yeni);
+  };
+
+  const guncelleKonaklama = (deger) => {
+    const yeni = { ...aktifVeri };
+    yeni.programlar[secilenProgram].konaklamalar[secilenKonaklama] = deger;
+    guncelle(yeni);
   };
 
   return (
@@ -109,58 +82,143 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
         </div>
       )}
 
-      {aktifVeri.ucretAraliklari && (
+      {aktifVeri.programlar && (
         <div>
-          <label>ücretAraliklari</label>
-          {aktifVeri.ucretAraliklari.map((aralik, i) => (
-            <div key={i} className="array-row">
-              {aralik.map((v, j) => (
-                <input
-                  key={j}
-                  type="number"
-                  value={v}
-                  onChange={(e) => {
-                    const yeni = [...aktifVeri.ucretAraliklari];
-                    yeni[i][j] = Number(e.target.value);
-                    guncelle({ ...aktifVeri, ucretAraliklari: yeni });
-                  }}
-                />
-              ))}
-              <button className="ikon-sadece-btn" onClick={() => handleArrayRemove("ucretAraliklari", i)}>🗑️</button>
-            </div>
-          ))}
-          <button className="buton-ekle" onClick={() => handleArrayAdd("ucretAraliklari", [1, 2, 0])}>+ Ekle</button>
+          <label>Program Seçin</label>
+          <select
+            value={secilenProgram}
+            onChange={(e) => {
+              setSecilenProgram(e.target.value);
+              setSecilenKonaklama("");
+            }}
+          >
+            <option value="">Program seçin</option>
+            {Object.keys(aktifVeri.programlar).map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
         </div>
       )}
 
-      {aktifVeri.ozelDonemler && (
-        <div>
-          <label>özelDönemler</label>
-          {aktifVeri.ozelDonemler.map((donem, i) => (
-            <div key={i} className="array-row">
-              <input
-                type="date"
-                value={donem[0]}
-                onChange={(e) => {
-                  const yeni = [...aktifVeri.ozelDonemler];
-                  yeni[i][0] = e.target.value;
-                  guncelle({ ...aktifVeri, ozelDonemler: yeni });
-                }}
-              />
-              <input
-                type="date"
-                value={donem[1]}
-                onChange={(e) => {
-                  const yeni = [...aktifVeri.ozelDonemler];
-                  yeni[i][1] = e.target.value;
-                  guncelle({ ...aktifVeri, ozelDonemler: yeni });
-                }}
-              />
-              <button className="ikon-sadece-btn" onClick={() => handleArrayRemove("ozelDonemler", i)}>🗑️</button>
+      {secilenProgram && aktifVeri.programlar?.[secilenProgram] && (
+        <>
+          <div>
+            <label>ücretAraliklari</label>
+            {aktifVeri.programlar[secilenProgram].ucretAraliklari.map((aralik, i) => (
+              <div key={i} className="array-row">
+                {aralik.map((v, j) => (
+                  <input
+                    key={j}
+                    type="number"
+                    value={v}
+                    onChange={(e) => {
+                      const yeni = [...aktifVeri.programlar[secilenProgram].ucretAraliklari];
+                      yeni[i][j] = Number(e.target.value);
+                      guncelleAltAlan("programlar", "ucretAraliklari", yeni);
+                    }}
+                  />
+                ))}
+                <button className="ikon-sadece-btn" onClick={() => {
+                  const yeni = [...aktifVeri.programlar[secilenProgram].ucretAraliklari];
+                  yeni.splice(i, 1);
+                  guncelleAltAlan("programlar", "ucretAraliklari", yeni);
+                }}>🗑️</button>
+              </div>
+            ))}
+            <button className="buton-ekle" onClick={() => {
+              const yeni = [...aktifVeri.programlar[secilenProgram].ucretAraliklari, [1, 2, 0]];
+              guncelleAltAlan("programlar", "ucretAraliklari", yeni);
+            }}>+ Ekle</button>
+          </div>
+
+          <div>
+            <label>özelDönemler</label>
+            {aktifVeri.programlar[secilenProgram].ozelDonemler.map((donem, i) => (
+              <div key={i} className="array-row">
+                <input
+                  type="date"
+                  value={donem[0]}
+                  onChange={(e) => {
+                    const yeni = [...aktifVeri.programlar[secilenProgram].ozelDonemler];
+                    yeni[i][0] = e.target.value;
+                    guncelleAltAlan("programlar", "ozelDonemler", yeni);
+                  }}
+                />
+                <input
+                  type="date"
+                  value={donem[1]}
+                  onChange={(e) => {
+                    const yeni = [...aktifVeri.programlar[secilenProgram].ozelDonemler];
+                    yeni[i][1] = e.target.value;
+                    guncelleAltAlan("programlar", "ozelDonemler", yeni);
+                  }}
+                />
+                <button className="ikon-sadece-btn" onClick={() => {
+                  const yeni = [...aktifVeri.programlar[secilenProgram].ozelDonemler];
+                  yeni.splice(i, 1);
+                  guncelleAltAlan("programlar", "ozelDonemler", yeni);
+                }}>🗑️</button>
+              </div>
+            ))}
+            <button className="buton-ekle" onClick={() => {
+              const yeni = [...aktifVeri.programlar[secilenProgram].ozelDonemler, ["2025-01-01", "2025-01-15"]];
+              guncelleAltAlan("programlar", "ozelDonemler", yeni);
+            }}>+ Ekle</button>
+          </div>
+
+          <div>
+            <label>özelDönemEkÜcret</label>
+            <input
+              type="number"
+              value={aktifVeri.programlar[secilenProgram].ozelDonemEkUcret}
+              onChange={(e) => guncelleAltAlan("programlar", "ozelDonemEkUcret", Number(e.target.value))}
+            />
+          </div>
+
+          <div>
+            <label>Konaklama Seçin</label>
+            <select
+              value={secilenKonaklama}
+              onChange={(e) => setSecilenKonaklama(e.target.value)}
+            >
+              <option value="">Konaklama seçin</option>
+              {Object.keys(aktifVeri.programlar[secilenProgram].konaklamalar || {}).map((k) => (
+                <option key={k} value={k}>{k}</option>
+              ))}
+            </select>
+          </div>
+
+          {secilenKonaklama && (
+            <div>
+              <label>{secilenKonaklama} Ücret Aralıkları</label>
+              {(aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama] || []).map((aralik, i) => (
+                <div key={i} className="array-row">
+                  {aralik.map((v, j) => (
+                    <input
+                      key={j}
+                      type="number"
+                      value={v}
+                      onChange={(e) => {
+                        const yeni = [...aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama]];
+                        yeni[i][j] = Number(e.target.value);
+                        guncelleKonaklama(yeni);
+                      }}
+                    />
+                  ))}
+                  <button className="ikon-sadece-btn" onClick={() => {
+                    const yeni = [...aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama]];
+                    yeni.splice(i, 1);
+                    guncelleKonaklama(yeni);
+                  }}>🗑️</button>
+                </div>
+              ))}
+              <button className="buton-ekle" onClick={() => {
+                const yeni = [...(aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama] || []), [1, 4, 0]];
+                guncelleKonaklama(yeni);
+              }}>+ Ekle</button>
             </div>
-          ))}
-          <button className="buton-ekle" onClick={() => handleArrayAdd("ozelDonemler", ["2025-01-01", "2025-01-15"])}>+ Ekle</button>
-        </div>
+          )}
+        </>
       )}
     </div>
   );
