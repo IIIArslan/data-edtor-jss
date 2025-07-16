@@ -17,28 +17,27 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
 
   const handleSec = (yol) => setAktifYol(yol);
 
-  const getYeniAd = (yol) => {
-    const seviye = yol.length;
-    switch (seviye) {
-      case 0:
-        return "Yeni Ülke";
-      case 1:
-        return "Yeni Okul";
-      case 2:
-        return "Yeni Şehir";
-      case 3:
-        return "Yeni Program";
-      case 4:
-        return "Yeni Konaklama";
-      default:
-        return "Yeni Alan";
+  const getYeniAd = (hedef, tip) => {
+    const prefix = {
+      0: "Yeni Ülke",
+      1: "Yeni Okul",
+      2: "Yeni Şehir",
+      3: "Yeni Program",
+      4: "Yeni Konaklama",
+    }[tip] || "Yeni Alan";
+
+    let i = 1;
+    let yeniAd = prefix;
+    while (hedef[yeniAd]) {
+      yeniAd = `${prefix} ${i++}`;
     }
+    return yeniAd;
   };
 
   const handleEkle = (yol, tip) => {
     const yeniVeri = { ...veri };
     const hedef = yol.reduce((o, k) => (o[k] = o[k] || {}), yeniVeri);
-    const yeniAd = getYeniAd(yol);
+    const yeniAd = getYeniAd(hedef, yol.length);
 
     if (tip === "Ülke") {
       yeniVeri[yeniAd] = {
@@ -145,7 +144,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
             >
               <Pencil size={16} />
             </button>
-            <button className="ikon-sadece-btn" onClick={() => handleEkle(yeniYol, Object.keys(val)[0] ? "Program" : "Alt")}>
+            <button className="ikon-sadece-btn" onClick={() => handleEkle(yeniYol, Object.keys(val)[0] ? "Program" : "Alt")}>  
               <Plus size={16} />
             </button>
             <button className="ikon-sadece-btn" onClick={() => handleSil(yeniYol)}>
