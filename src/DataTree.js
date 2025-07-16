@@ -1,120 +1,170 @@
-import React, { useState } from "react";
+import React from "react";
 
-function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
-  const [expandedPaths, setExpandedPaths] = useState([]);
-
-  const toggleExpand = (yol) => {
-    const yolStr = yol.join("/");
-    setExpandedPaths((prev) =>
-      prev.includes(yolStr)
-        ? prev.filter((p) => p !== yolStr)
-        : [...prev, yolStr]
-    );
-  };
-
-  const handleSec = (yol) => setAktifYol(yol);
-
-  const handleEkle = (yol, tip) => {
+function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
+  const guncelle = (yeniDeger) => {
     const yeniVeri = { ...veri };
-    const hedef = yol.reduce((o, k) => (o[k] = o[k] || {}), yeniVeri);
-    const yeniAd = `Yeni ${tip}`;
-
-    if (tip === "Ülke") {
-      yeniVeri[yeniAd] = {
-        "Yeni Okul": {
-          "Yeni Şehir": {
-            paraBirimi: "birim",
-            ekHizmetler: [{ isim: "Hizmet İsmi", ucret: 0 }],
-            programlar: {
-              "Yeni Program": {
-                ucretAraliklari: [[1, 4, 100]],
-                ozelDonemler: [["2025-01-01", "2025-01-15"]],
-                ozelDonemEkUcret: 50,
-                konaklamalar: {
-                  "Aile Yanı": [[1, 4, 200]]
-                }
-              }
-            }
-          }
-        }
-      };
-    } else {
-      hedef[yeniAd] = tip === "Program"
-        ? {
-            ucretAraliklari: [[1, 4, 100]],
-            ozelDonemler: [["2025-01-01", "2025-01-15"]],
-            ozelDonemEkUcret: 50,
-            konaklamalar: {
-              "Aile Yanı": [[1, 4, 200]]
-            }
-          }
-        : {};
-    }
+    const hedef = aktifYol.slice(0, -1).reduce((o, k) => o[k], yeniVeri);
+    hedef[aktifYol[aktifYol.length - 1]] = yeniDeger;
     setVeri(yeniVeri);
-    setExpandedPaths((prev) => [...prev, yol.join("/")]);
   };
 
-  const handleSil = (yol) => {
-    if (!yol.length) return;
-    const yeniVeri = { ...veri };
-    const son = yol[yol.length - 1];
-    const ebeveyn = yol.slice(0, -1).reduce((o, k) => o?.[k], yeniVeri);
-    if (ebeveyn && ebeveyn[son]) delete ebeveyn[son];
-    setVeri(yeniVeri);
-    setAktifYol([]);
-  };
+  if (aktifVeri === null || aktifVeri === undefined) {
+    return <div className="editor-panel">Bir öğe seçin</div>;
+  }
 
-  const renderTree = (obj, yol = []) => {
-    return Object.entries(obj).map(([key, val]) => {
-      const yeniYol = [...yol, key];
-      const isExpanded = expandedPaths.includes(yeniYol.join("/"));
-      const isActive = JSON.stringify(aktifYol) === JSON.stringify(yeniYol);
-      const isObject = typeof val === "object" && val !== null && !Array.isArray(val);
+  // Eğer aktifVeri dizi ise (örneğin [ [1,4,200], [5,12,180] ])
+  if (Array.isArray(aktifVeri) && Array.isArray(aktifVeri[0])) {
+    const handleArrayChange = (index, subIndex, value) => {
+      const yeni = [...aktifVeri];
+      yeni[index][subIndex] = Number(value);
+      guncelle(yeni);
+    };
 
-      if (
-        arama &&
-        !yeniYol.join("/").toLowerCase().includes(arama.toLowerCase())
-      )
-        return null;
+    const handleArrayRemove = (index) => {
+      const yeni = [...aktifVeri];
+      yeni.splice(index, 1);
+      guncelle(yeni);
+    };
 
-      return (
-        <div key={yeniYol.join("/")} className="veri-satir">
-          <div
-            style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}
-          >
-            <div
-              style={{ cursor: "pointer", fontWeight: "bold", color: "#c24a00", flexGrow: 1 }}
-              onClick={() => toggleExpand(yeniYol)}
-            >
-              {isObject && (isExpanded ? "▼" : "▶")} {" "}
-              <span
-                onClick={() => handleSec(yeniYol)}
-                className={isActive ? "aktif-yol" : ""}
-              >
-                {key}
-              </span>
-            </div>
-            <button onClick={() => handleEkle(yeniYol, Object.keys(val)[0] ? "Program" : "Alt")}>+</button>
-            <button onClick={() => handleSil(yeniYol)}>🗑️</button>
+    const handleArrayAdd = () => {
+      guncelle([...aktifVeri, [1, 4, 0]]);
+    };
+
+    return (
+      <div className="editor-panel">
+        <label>{aktifYol.at(-1)}</label>
+        {aktifVeri.map((aralik, i) => (
+          <div key={i} className="array-row">
+            {aralik.map((v, j) => (
+              <input
+                key={j}
+                type="number"
+                value={v}
+                onChange={(e) => handleArrayChange(i, j, e.target.value)}
+              />
+            ))}
+            <button onClick={() => handleArrayRemove(i)}>🗑️</button>
           </div>
-          {isExpanded && isObject && (
-            <div style={{ paddingLeft: "1rem" }}>{renderTree(val, yeniYol)}</div>
-          )}
-        </div>
-      );
-    });
+        ))}
+        <button onClick={handleArrayAdd}>+ Ekle</button>
+      </div>
+    );
+  }
+
+  if (typeof aktifVeri !== "object") {
+    return <div className="editor-panel">Düzenlenebilir veri bulunamadı</div>;
+  }
+
+  const handleInput = (alan, deger) => {
+    guncelle({ ...aktifVeri, [alan]: deger });
+  };
+
+  const handleArrayAdd = (alan, yeni) => {
+    guncelle({ ...aktifVeri, [alan]: [...(aktifVeri[alan] || []), yeni] });
+  };
+
+  const handleArrayRemove = (alan, index) => {
+    const yeniListe = [...aktifVeri[alan]];
+    yeniListe.splice(index, 1);
+    guncelle({ ...aktifVeri, [alan]: yeniListe });
   };
 
   return (
-    <div className="data-tree">
-      <button onClick={() => handleEkle([], "Ülke")} className="ulke-ekle">
-        + Ülke Ekle
-      </button>
-      <div className="veri-agaci-scroll">
-        {renderTree(veri)}
-      </div>
+    <div className="editor-panel">
+      {aktifVeri.paraBirimi !== undefined && (
+        <div>
+          <label>paraBirimi</label>
+          <input
+            value={aktifVeri.paraBirimi}
+            onChange={(e) => handleInput("paraBirimi", e.target.value)}
+          />
+        </div>
+      )}
+
+      {aktifVeri.ekHizmetler && (
+        <div>
+          <label>ekHizmetler</label>
+          {aktifVeri.ekHizmetler.map((h, i) => (
+            <div key={i} className="array-row">
+              <input
+                value={h.isim}
+                onChange={(e) => {
+                  const yeni = [...aktifVeri.ekHizmetler];
+                  yeni[i].isim = e.target.value;
+                  guncelle({ ...aktifVeri, ekHizmetler: yeni });
+                }}
+              />
+              <input
+                type="number"
+                value={h.ucret}
+                onChange={(e) => {
+                  const yeni = [...aktifVeri.ekHizmetler];
+                  yeni[i].ucret = Number(e.target.value);
+                  guncelle({ ...aktifVeri, ekHizmetler: yeni });
+                }}
+              />
+              <button onClick={() => handleArrayRemove("ekHizmetler", i)}>🗑️</button>
+            </div>
+          ))}
+          <button onClick={() => handleArrayAdd("ekHizmetler", { isim: "Yeni Hizmet", ucret: 0 })}>+ Ekle</button>
+        </div>
+      )}
+
+      {aktifVeri.ucretAraliklari && (
+        <div>
+          <label>ücretAraliklari</label>
+          {aktifVeri.ucretAraliklari.map((aralik, i) => (
+            <div key={i} className="array-row">
+              {aralik.map((v, j) => (
+                <input
+                  key={j}
+                  type="number"
+                  value={v}
+                  onChange={(e) => {
+                    const yeni = [...aktifVeri.ucretAraliklari];
+                    yeni[i][j] = Number(e.target.value);
+                    guncelle({ ...aktifVeri, ucretAraliklari: yeni });
+                  }}
+                />
+              ))}
+              <button onClick={() => handleArrayRemove("ucretAraliklari", i)}>🗑️</button>
+            </div>
+          ))}
+          <button onClick={() => handleArrayAdd("ucretAraliklari", [1, 2, 0])}>+ Ekle</button>
+        </div>
+      )}
+
+      {aktifVeri.ozelDonemler && (
+        <div>
+          <label>özelDönemler</label>
+          {aktifVeri.ozelDonemler.map((donem, i) => (
+            <div key={i} className="array-row">
+              <input
+                type="date"
+                value={donem[0]}
+                onChange={(e) => {
+                  const yeni = [...aktifVeri.ozelDonemler];
+                  yeni[i][0] = e.target.value;
+                  guncelle({ ...aktifVeri, ozelDonemler: yeni });
+                }}
+              />
+              <input
+                type="date"
+                value={donem[1]}
+                onChange={(e) => {
+                  const yeni = [...aktifVeri.ozelDonemler];
+                  yeni[i][1] = e.target.value;
+                  guncelle({ ...aktifVeri, ozelDonemler: yeni });
+                }}
+              />
+              <button onClick={() => handleArrayRemove("ozelDonemler", i)}>🗑️</button>
+            </div>
+          ))}
+          <button onClick={() => handleArrayAdd("ozelDonemler", ["2025-01-01", "2025-01-15"])}>+ Ekle</button>
+        </div>
+      )}
     </div>
   );
 }
 
-export default DataTree;
+export default EditorPanel;
