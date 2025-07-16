@@ -6,6 +6,14 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   const [editingPath, setEditingPath] = useState(null);
   const [editingValue, setEditingValue] = useState("");
 
+  const sabitAlanlar = [
+    "paraBirimi",
+    "ekHizmetler",
+    "ucretAraliklari",
+    "ozelDonemler",
+    "ozelDonemEkUcret"
+  ];
+
   const toggleExpand = (yol) => {
     const yolStr = yol.join("/");
     setExpandedPaths((prev) =>
@@ -20,12 +28,12 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   const getYeniAd = (yol, mevcut) => {
     const seviye = yol.length;
     const base = (() => {
-      if (yol.at(-1) === "konaklamalar") return "Yeni Konaklama";
       switch (seviye) {
         case 0: return "Yeni Ülke";
         case 1: return "Yeni Okul";
         case 2: return "Yeni Şehir";
         case 3: return "Yeni Program";
+        case 4: return "Yeni Konaklama";
         default: return "Yeni Alan";
       }
     })();
@@ -141,6 +149,17 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
 
       if (arama && !yeniYol.join("/").toLowerCase().includes(arama.toLowerCase())) return null;
 
+      const isSabitAlan = sabitAlanlar.includes(key);
+
+      const showAdd =
+        (yeniYol.at(-1) === "konaklamalar") ||
+        (yeniYol.at(-1) === "programlar") ||
+        (yeniYol.length === 0) ||
+        (yeniYol.length === 1) ||
+        (yeniYol.length === 2);
+
+      const showEditDelete = !isSabitAlan;
+
       return (
         <div key={yeniYol.join("/")} className="veri-satir">
           <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
@@ -173,28 +192,31 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
                 </span>
               )}
             </div>
-            <button
-              className="ikon-sadece-btn"
-              onClick={() => {
-                setEditingPath(yeniYol);
-                setEditingValue(key);
-              }}
-            >
-              <Pencil size={16} />
-            </button>
-            <button
-              className="ikon-sadece-btn"
-              onClick={() => {
-                const seviye = yeniYol.length;
-                const tip = seviye === 0 ? "Ülke" : seviye === 1 ? "Okul" : seviye === 2 ? "Şehir" : seviye === 3 ? "Program" : "Alt";
-                handleEkle(yeniYol, tip);
-              }}
-            >
-              <Plus size={16} />
-            </button>
-            <button className="ikon-sadece-btn" onClick={() => handleSil(yeniYol)}>
-              <Trash2 size={16} />
-            </button>
+            {showEditDelete && (
+              <>
+                <button className="ikon-sadece-btn" onClick={() => {
+                  setEditingPath(yeniYol);
+                  setEditingValue(key);
+                }}>
+                  <Pencil size={16} />
+                </button>
+                <button className="ikon-sadece-btn" onClick={() => handleSil(yeniYol)}>
+                  <Trash2 size={16} />
+                </button>
+              </>
+            )}
+            {showAdd && (
+              <button
+                className="ikon-sadece-btn"
+                onClick={() => {
+                  const seviye = yeniYol.length;
+                  const tip = seviye === 0 ? "Ülke" : seviye === 1 ? "Okul" : seviye === 2 ? "Şehir" : seviye === 3 ? "Program" : "Alt";
+                  handleEkle(yeniYol, tip);
+                }}
+              >
+                <Plus size={16} />
+              </button>
+            )}
           </div>
           {isExpanded && isObject && (
             <div style={{ paddingLeft: "1rem" }}>{renderTree(val, yeniYol)}</div>
