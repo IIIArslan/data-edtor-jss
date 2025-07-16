@@ -162,7 +162,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
 
   return (
     <div className="data-tree">
-      <button onClick={() => handleEkle([], "Ülke"))} className="ulke-ekle">
+      <button onClick={() => handleEkle([], "Ülke")} className="ulke-ekle">
         <Plus size={16} style={{ marginRight: "0.3rem" }} /> Ülke Ekle
       </button>
       <div className="veri-agaci-scroll">{renderTree(veri)}</div>
