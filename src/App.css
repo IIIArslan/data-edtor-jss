@@ -1,4 +1,4 @@
-/* Temel Ayarlar */
+
 body {
   margin: 0;
   font-family: sans-serif;
@@ -195,7 +195,6 @@ body {
   margin-bottom: 0.3rem;
 }
 
-/* Yüklenen dosya adı paneli */
 .upload-status-panel {
   font-size: 0.9rem;
   background: var(--input-bg);
@@ -216,3 +215,15 @@ body {
   background: var(--bg);
   color: var(--fg);
 }
+
+.veri-agaci-scroll {
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+
+  scrollbar-width: none;            
+  -ms-overflow-style: none;         
+}
+.veri-agaci-scroll::-webkit-scrollbar {
+  display: none;                     
+}
+
