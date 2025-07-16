@@ -17,19 +17,23 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
 
   const handleSec = (yol) => setAktifYol(yol);
 
-  const getYeniAd = (hedef, tip) => {
-    const prefix = {
-      0: "Yeni Ülke",
-      1: "Yeni Okul",
-      2: "Yeni Şehir",
-      3: "Yeni Program",
-      4: "Yeni Konaklama",
-    }[tip] || "Yeni Alan";
+  const getYeniAd = (yol, mevcut) => {
+    const seviye = yol.length;
+    const base = (() => {
+      switch (seviye) {
+        case 0: return "Yeni Ülke";
+        case 1: return "Yeni Okul";
+        case 2: return "Yeni Şehir";
+        case 3: return "Yeni Program";
+        case 4: return "Yeni Konaklama";
+        default: return "Yeni Alan";
+      }
+    })();
 
-    let i = 1;
-    let yeniAd = prefix;
-    while (hedef[yeniAd]) {
-      yeniAd = `${prefix} ${i++}`;
+    let index = 1;
+    let yeniAd = base;
+    while (mevcut.hasOwnProperty(yeniAd)) {
+      yeniAd = `${base} ${index++}`;
     }
     return yeniAd;
   };
@@ -37,7 +41,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   const handleEkle = (yol, tip) => {
     const yeniVeri = { ...veri };
     const hedef = yol.reduce((o, k) => (o[k] = o[k] || {}), yeniVeri);
-    const yeniAd = getYeniAd(hedef, yol.length);
+    const yeniAd = getYeniAd(yol, hedef);
 
     if (tip === "Ülke") {
       yeniVeri[yeniAd] = {
@@ -89,7 +93,10 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
     const yeniVeri = { ...veri };
     const ebeveyn = yol.slice(0, -1).reduce((o, k) => o[k], yeniVeri);
     const eskiKey = yol[yol.length - 1];
-    if (!yeniKey || yeniKey === eskiKey) return;
+    if (!yeniKey || yeniKey === eskiKey) {
+      setEditingPath(null);
+      return;
+    }
     ebeveyn[yeniKey] = ebeveyn[eskiKey];
     delete ebeveyn[eskiKey];
     setVeri(yeniVeri);
@@ -121,7 +128,10 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
                   onChange={(e) => setEditingValue(e.target.value)}
                   onBlur={() => handleKeyEdit(yeniYol, editingValue)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") handleKeyEdit(yeniYol, editingValue);
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleKeyEdit(yeniYol, editingValue);
+                    }
                   }}
                   autoFocus
                   style={{ fontSize: "0.9rem", padding: "2px 6px" }}
