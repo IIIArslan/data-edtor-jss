@@ -62,7 +62,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
           }
         }
       };
-    } else if (tip === "Alt" && yol.length === 1) {
+    } else if (tip === "Okul") {
       hedef[yeniAd] = {
         "Yeni Şehir": {
           paraBirimi: "birim",
@@ -173,7 +173,11 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
             </button>
             <button
               className="ikon-sadece-btn"
-              onClick={() => handleEkle(yeniYol, "Program")}
+              onClick={() => {
+                const seviye = yeniYol.length;
+                const tip = seviye === 0 ? "Ülke" : seviye === 1 ? "Okul" : seviye === 2 ? "Şehir" : seviye === 3 ? "Program" : "Alt";
+                handleEkle(yeniYol, tip);
+              }}
             >
               <Plus size={16} />
             </button>
@@ -191,7 +195,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
 
   return (
     <div className="data-tree">
-      <button onClick={() => handleEkle([], "Ülke")} className="ulke-ekle">
+      <button onClick={() => handleEkle([], "Ülke") } className="ulke-ekle">
         <Plus size={16} style={{ marginRight: "0.3rem" }} /> Ülke Ekle
       </button>
       <div className="veri-agaci-scroll">{renderTree(veri)}</div>
