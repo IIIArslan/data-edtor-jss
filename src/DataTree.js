@@ -20,12 +20,12 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   const getYeniAd = (yol, mevcut) => {
     const seviye = yol.length;
     const base = (() => {
+      if (yol.at(-1) === "konaklamalar") return "Yeni Konaklama";
       switch (seviye) {
         case 0: return "Yeni Ülke";
         case 1: return "Yeni Okul";
         case 2: return "Yeni Şehir";
         case 3: return "Yeni Program";
-        case 4: return "Aile Yanı";
         default: return "Yeni Alan";
       }
     })();
@@ -55,7 +55,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
                 ozelDonemler: [["2025-01-01", "2025-01-15"]],
                 ozelDonemEkUcret: 50,
                 konaklamalar: {
-                  "Aile Yanı": [[1, 4, 200]]
+                  "Yeni Konaklama": [[1, 4, 200]]
                 }
               }
             }
@@ -73,7 +73,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
               ozelDonemler: [["2025-01-01", "2025-01-15"]],
               ozelDonemEkUcret: 50,
               konaklamalar: {
-                "Aile Yanı": [[1, 4, 200]]
+                "Yeni Konaklama": [[1, 4, 200]]
               }
             }
           }
@@ -85,20 +85,20 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
         ozelDonemler: [["2025-01-01", "2025-01-15"]],
         ozelDonemEkUcret: 50,
         konaklamalar: {
-          "Aile Yanı": [[1, 4, 200]]
+          "Yeni Konaklama": [[1, 4, 200]]
         }
       };
     } else if (yol.includes("programlar") && yol.at(-1) !== "konaklamalar") {
-      hedef["Yeni Program"] = {
+      hedef[getYeniAd(yol, hedef)] = {
         ucretAraliklari: [[1, 4, 100]],
         ozelDonemler: [["2025-01-01", "2025-01-15"]],
         ozelDonemEkUcret: 50,
         konaklamalar: {
-          "Aile Yanı": [[1, 4, 200]]
+          "Yeni Konaklama": [[1, 4, 200]]
         }
       };
     } else if (yol.at(-1) === "konaklamalar") {
-      hedef["Aile Yanı"] = [[1, 4, 200]];
+      hedef[getYeniAd(yol, hedef)] = [[1, 4, 200]];
     } else {
       hedef[yeniAd] = {};
     }
