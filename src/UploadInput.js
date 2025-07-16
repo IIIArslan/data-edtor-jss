@@ -2,11 +2,14 @@ import React, { useState } from "react";
 
 function UploadInput({ setVeri }) {
   const [dosyaAdi, setDosyaAdi] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [geciciAd, setGeciciAd] = useState("");
 
   const handleUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setDosyaAdi(file.name);
+    setGeciciAd(file.name);
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -29,6 +32,13 @@ function UploadInput({ setVeri }) {
     setVeri({});
     localStorage.removeItem("veri");
     setDosyaAdi("");
+    setGeciciAd("");
+    setIsEditing(false);
+  };
+
+  const handleEditSave = () => {
+    setDosyaAdi(geciciAd);
+    setIsEditing(false);
   };
 
   return (
@@ -43,8 +53,44 @@ function UploadInput({ setVeri }) {
         />
       </label>
       {dosyaAdi && (
-        <div style={{ fontSize: "0.85rem", marginTop: "0.3rem", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-          ✅ {dosyaAdi}
+        <div
+          style={{
+            fontSize: "0.85rem",
+            marginTop: "0.3rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.3rem",
+          }}
+        >
+          ✅
+          {isEditing ? (
+            <input
+              value={geciciAd}
+              onChange={(e) => setGeciciAd(e.target.value)}
+              onBlur={handleEditSave}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleEditSave();
+              }}
+              autoFocus
+              style={{
+                padding: "2px 6px",
+                fontSize: "0.8rem",
+                background: "var(--input-bg)",
+                color: "var(--fg)",
+                border: "1px solid var(--border)",
+                borderRadius: "4px",
+              }}
+            />
+          ) : (
+            <span style={{ cursor: "text" }}>{dosyaAdi}</span>
+          )}
+          <button
+            onClick={() => setIsEditing(true)}
+            title="Adı Düzenle"
+            style={{ fontSize: "0.9rem", background: "none", border: "none", color: "#61dafb", cursor: "pointer" }}
+          >
+            ✏️
+          </button>
           <button
             onClick={handleClear}
             title="Dosyayı Sıfırla"
