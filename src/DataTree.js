@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Plus, Trash2, ChevronRight, ChevronDown } from "lucide-react";
 
 function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   const [expandedPaths, setExpandedPaths] = useState([]);
@@ -110,7 +111,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
               }}
               onClick={() => toggleExpand(yeniYol)}
             >
-              {isObject && (isExpanded ? "▼" : "▶")}{" "}
+              {isObject && (isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}{" "}
               <span
                 onClick={() => handleSec(yeniYol)}
                 className={isActive ? "aktif-yol" : ""}
@@ -118,17 +119,12 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
                 {key}
               </span>
             </div>
-            <button
-              onClick={() =>
-                handleEkle(
-                  yeniYol,
-                  Object.keys(val)[0] ? "Program" : "Alt"
-                )
-              }
-            >
-              +
+            <button onClick={() => handleEkle(yeniYol, Object.keys(val)[0] ? "Program" : "Alt")}>
+              <Plus size={16} />
             </button>
-            <button onClick={() => handleSil(yeniYol)}>🗑️</button>
+            <button onClick={() => handleSil(yeniYol)}>
+              <Trash2 size={16} />
+            </button>
           </div>
           {isExpanded && isObject && (
             <div style={{ paddingLeft: "1rem" }}>
@@ -143,7 +139,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   return (
     <div className="data-tree">
       <button onClick={() => handleEkle([], "Ülke")} className="ulke-ekle">
-        + Ülke Ekle
+        <Plus size={16} style={{ marginRight: "0.3rem" }} /> Ülke Ekle
       </button>
       <div className="veri-agaci-scroll">{renderTree(veri)}</div>
     </div>
