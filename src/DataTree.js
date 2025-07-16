@@ -25,19 +25,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
 
   const handleSec = (yol) => setAktifYol(yol);
 
-  const getYeniAd = (yol, mevcut) => {
-    const seviye = yol.length;
-    const base = (() => {
-      switch (seviye) {
-        case 0: return "Yeni Ülke";
-        case 1: return "Yeni Okul";
-        case 2: return "Yeni Şehir";
-        case 3: return "Yeni Program";
-        case 4: return "Yeni Konaklama";
-        default: return "Yeni Alan";
-      }
-    })();
-
+  const getYeniAd = (mevcut, base) => {
     let index = 1;
     let yeniAd = base;
     while (mevcut.hasOwnProperty(yeniAd)) {
@@ -49,71 +37,54 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   const handleEkle = (yol, tip) => {
     const yeniVeri = structuredClone(veri);
     const hedef = yol.reduce((o, k) => (o[k] = o[k] || {}), yeniVeri);
-    const yeniAd = getYeniAd(yol, hedef);
 
+    let yeniAd;
     if (tip === "Ülke") {
+      yeniAd = getYeniAd(yeniVeri, "Yeni Ülke");
       yeniVeri[yeniAd] = {
         "Yeni Okul": {
-          "Yeni Şehir": {
-            paraBirimi: "birim",
-            ekHizmetler: [{ isim: "Hizmet İsmi", ucret: 0 }],
-            programlar: {
-              "Yeni Program": {
-                ucretAraliklari: [[1, 4, 100]],
-                ozelDonemler: [["2025-01-01", "2025-01-15"]],
-                ozelDonemEkUcret: 50,
-                konaklamalar: {
-                  "Yeni Konaklama": [[1, 4, 200]]
-                }
-              }
-            }
-          }
+          "Yeni Şehir": getSehirSablonu()
         }
       };
     } else if (tip === "Okul") {
+      yeniAd = getYeniAd(hedef, "Yeni Okul");
       hedef[yeniAd] = {
-        "Yeni Şehir": {
-          paraBirimi: "birim",
-          ekHizmetler: [{ isim: "Hizmet İsmi", ucret: 0 }],
-          programlar: {
-            "Yeni Program": {
-              ucretAraliklari: [[1, 4, 100]],
-              ozelDonemler: [["2025-01-01", "2025-01-15"]],
-              ozelDonemEkUcret: 50,
-              konaklamalar: {
-                "Yeni Konaklama": [[1, 4, 200]]
-              }
-            }
-          }
-        }
+        "Yeni Şehir": getSehirSablonu()
       };
+    } else if (tip === "Şehir") {
+      yeniAd = getYeniAd(hedef, "Yeni Şehir");
+      hedef[yeniAd] = getSehirSablonu();
     } else if (tip === "Program") {
-      hedef[yeniAd] = {
-        ucretAraliklari: [[1, 4, 100]],
-        ozelDonemler: [["2025-01-01", "2025-01-15"]],
-        ozelDonemEkUcret: 50,
-        konaklamalar: {
-          "Yeni Konaklama": [[1, 4, 200]]
-        }
-      };
-    } else if (yol.includes("programlar") && yol.at(-1) !== "konaklamalar") {
-      hedef[getYeniAd(yol, hedef)] = {
-        ucretAraliklari: [[1, 4, 100]],
-        ozelDonemler: [["2025-01-01", "2025-01-15"]],
-        ozelDonemEkUcret: 50,
-        konaklamalar: {
-          "Yeni Konaklama": [[1, 4, 200]]
-        }
-      };
-    } else if (yol.at(-1) === "konaklamalar") {
-      hedef[getYeniAd(yol, hedef)] = [[1, 4, 200]];
+      yeniAd = getYeniAd(hedef, "Yeni Program");
+      hedef[yeniAd] = getProgramSablonu();
+    } else if (tip === "Konaklama") {
+      yeniAd = getYeniAd(hedef, "Yeni Konaklama");
+      hedef[yeniAd] = [[1, 4, 200]];
     } else {
+      yeniAd = getYeniAd(hedef, "Yeni Alan");
       hedef[yeniAd] = {};
     }
 
     setVeri(yeniVeri);
     setExpandedPaths((prev) => [...new Set([...prev, yol.join("/"), [...yol, yeniAd].join("/")])]);
   };
+
+  const getSehirSablonu = () => ({
+    paraBirimi: "birim",
+    ekHizmetler: [{ isim: "Havaalanı Transferi", ucret: 50 }],
+    programlar: {
+      "Yeni Program": getProgramSablonu()
+    }
+  });
+
+  const getProgramSablonu = () => ({
+    ucretAraliklari: [[1, 4, 100]],
+    ozelDonemler: [["2025-01-01", "2025-01-15"]],
+    ozelDonemEkUcret: 50,
+    konaklamalar: {
+      "Yeni Konaklama": [[1, 4, 200]]
+    }
+  });
 
   const handleSil = (yol) => {
     if (!yol.length) return;
@@ -210,8 +181,13 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
                 className="ikon-sadece-btn"
                 onClick={() => {
                   const seviye = yeniYol.length;
-                  const tip = seviye === 0 ? "Ülke" : seviye === 1 ? "Okul" : seviye === 2 ? "Şehir" : seviye === 3 ? "Program" : "Alt";
-                  handleEkle(yeniYol, tip);
+                  const tip = yeniYol.at(-1);
+                  if (tip === "programlar") handleEkle(yeniYol, "Program");
+                  else if (tip === "konaklamalar") handleEkle(yeniYol, "Konaklama");
+                  else if (seviye === 0) handleEkle(yeniYol, "Ülke");
+                  else if (seviye === 1) handleEkle(yeniYol, "Okul");
+                  else if (seviye === 2) handleEkle(yeniYol, "Şehir");
+                  else handleEkle(yeniYol, "Alan");
                 }}
               >
                 <Plus size={16} />
@@ -228,7 +204,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
 
   return (
     <div className="data-tree">
-      <button onClick={() => handleEkle([], "Ülke")} className="ulke-ekle">
+      <button onClick={() => handleEkle([], "Ülke") } className="ulke-ekle">
         <Plus size={16} style={{ marginRight: "0.3rem" }} /> Ülke Ekle
       </button>
       <div className="veri-agaci-scroll">{renderTree(veri)}</div>
