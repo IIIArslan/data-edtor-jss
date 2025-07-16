@@ -1,4 +1,4 @@
-""import React, { useState } from "react";
+import React, { useState } from "react";
 import { Plus, Trash2, ChevronRight, ChevronDown, Pencil } from "lucide-react";
 
 function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
@@ -39,7 +39,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   };
 
   const handleEkle = (yol, tip) => {
-    const yeniVeri = { ...veri };
+    const yeniVeri = structuredClone(veri);
     const hedef = yol.reduce((o, k) => (o[k] = o[k] || {}), yeniVeri);
     const yeniAd = getYeniAd(yol, hedef);
 
@@ -63,7 +63,6 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
         }
       };
     } else if (tip === "Alt" && yol.length === 1) {
-      // Yeni okul eklendiğinde otomatik şehir şablonuyla başlat
       hedef[yeniAd] = {
         "Yeni Şehir": {
           paraBirimi: "birim",
@@ -80,26 +79,26 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
           }
         }
       };
+    } else if (tip === "Program") {
+      hedef[yeniAd] = {
+        ucretAraliklari: [[1, 4, 100]],
+        ozelDonemler: [["2025-01-01", "2025-01-15"]],
+        ozelDonemEkUcret: 50,
+        konaklamalar: {
+          "Aile Yanı": [[1, 4, 200]]
+        }
+      };
     } else {
-      hedef[yeniAd] = tip === "Program"
-        ? {
-            ucretAraliklari: [[1, 4, 100]],
-            ozelDonemler: [["2025-01-01", "2025-01-15"]],
-            ozelDonemEkUcret: 50,
-            konaklamalar: {
-              "Aile Yanı": [[1, 4, 200]]
-            }
-          }
-        : {};
+      hedef[yeniAd] = {};
     }
 
     setVeri(yeniVeri);
-    setExpandedPaths((prev) => [...prev, yol.join("/")]);
+    setExpandedPaths((prev) => [...new Set([...prev, yol.join("/"), [...yol, yeniAd].join("/")])]);
   };
 
   const handleSil = (yol) => {
     if (!yol.length) return;
-    const yeniVeri = { ...veri };
+    const yeniVeri = structuredClone(veri);
     const son = yol[yol.length - 1];
     const ebeveyn = yol.slice(0, -1).reduce((o, k) => o?.[k], yeniVeri);
     if (ebeveyn && ebeveyn[son]) delete ebeveyn[son];
@@ -108,7 +107,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   };
 
   const handleKeyEdit = (yol, yeniKey) => {
-    const yeniVeri = { ...veri };
+    const yeniVeri = structuredClone(veri);
     const ebeveyn = yol.slice(0, -1).reduce((o, k) => o[k], yeniVeri);
     const eskiKey = yol[yol.length - 1];
     if (!yeniKey || yeniKey === eskiKey) {
@@ -174,7 +173,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
             </button>
             <button
               className="ikon-sadece-btn"
-              onClick={() => handleEkle(yeniYol, Object.keys(val)[0] ? "Program" : "Alt")}
+              onClick={() => handleEkle(yeniYol, "Program")}
             >
               <Plus size={16} />
             </button>
