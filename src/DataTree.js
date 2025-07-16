@@ -119,10 +119,10 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
                 {key}
               </span>
             </div>
-            <button onClick={() => handleEkle(yeniYol, Object.keys(val)[0] ? "Program" : "Alt")}>
+            <button className="ikon-sadece-btn" onClick={() => handleEkle(yeniYol, Object.keys(val)[0] ? "Program" : "Alt")}>
               <Plus size={16} />
             </button>
-            <button onClick={() => handleSil(yeniYol)}>
+            <button className="ikon-sadece-btn" onClick={() => handleSil(yeniYol)}>
               <Trash2 size={16} />
             </button>
           </div>
@@ -135,6 +135,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
       );
     });
   };
+
   return (
     <div className="data-tree">
       <button onClick={() => handleEkle([], "Ülke")} className="ulke-ekle">
