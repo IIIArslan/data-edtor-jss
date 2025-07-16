@@ -14,6 +14,24 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
     "ozelDonemEkUcret"
   ];
 
+  const getRenkForPath = (yol, key) => {
+    const len = yol.length;
+
+    if (len === 1) return "#FFB347"; // Ülke
+    if (len === 2) return "#A3D977"; // Okul
+    if (len === 3) return "#6EC1E4"; // Şehir
+
+    if (["paraBirimi", "ekHizmetler", "programlar"].includes(key)) return "#C0C0C0"; // Sabit alanlar
+
+    if (["ucretAraliklari", "ozelDonemler", "ozelDonemEkUcret", "konaklamalar"].includes(key))
+      return "#C8A2C8"; // Program alt başlıkları
+
+    if (yol.includes("konaklamalar") && key !== "konaklamalar")
+      return "#F2E394"; // Konaklama içeriği
+
+    return "#c24a00";
+  };
+
   const toggleExpand = (yol) => {
     const yolStr = yol.join("/");
     setExpandedPaths((prev) =>
@@ -131,11 +149,13 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
 
       const showEditDelete = !isSabitAlan;
 
+      const renk = getRenkForPath(yeniYol, key);
+
       return (
         <div key={yeniYol.join("/")} className="veri-satir">
           <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
             <div
-              style={{ cursor: "pointer", fontWeight: "bold", color: "#c24a00", flexGrow: 1 }}
+              style={{ cursor: "pointer", fontWeight: "bold", color: renk, flexGrow: 1 }}
               onClick={() => toggleExpand(yeniYol)}
             >
               {isObject && (isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}{" "}
@@ -204,7 +224,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
 
   return (
     <div className="data-tree">
-      <button onClick={() => handleEkle([], "Ülke") } className="ulke-ekle">
+      <button onClick={() => handleEkle([], "Ülke")} className="ulke-ekle">
         <Plus size={16} style={{ marginRight: "0.3rem" }} /> Ülke Ekle
       </button>
       <div className="veri-agaci-scroll">{renderTree(veri)}</div>
