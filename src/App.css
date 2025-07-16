@@ -227,3 +227,19 @@ body {
   display: none;                     
 }
 
+.ana-icerik {
+  scrollbar-width: none;        
+  -ms-overflow-style: none;     
+}
+.ana-icerik::-webkit-scrollbar {
+  display: none;                
+}
+
+.data-tree {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.data-tree::-webkit-scrollbar {
+  display: none;
+}
+
