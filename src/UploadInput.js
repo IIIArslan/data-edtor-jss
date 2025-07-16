@@ -1,32 +1,38 @@
 import React from "react";
 
-function UploadInput({ onYukle }) {
-  const handleFileChange = (e) => {
+function UploadInput({ setVeri }) {
+  const handleUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target.result;
-
       try {
-        const match = text.match(/export const genisVeri\s*=\s*(\{[\s\S]*\});?/);
-        if (!match) throw new Error("Geçerli bir genisVeri yapısı bulunamadı.");
-        const parsed = JSON.parse(match[1]);
-        onYukle(JSON.stringify(parsed, null, 2)); // App.js içinde tekrar eval edilecek
-        alert("✔ Dosya başarıyla yüklendi.");
+        // "export const genisVeri = {" satırıyla başlayan .js dosyasını parse et
+        const jsonStart = text.indexOf("{");
+        const jsonString = text.slice(jsonStart);
+        const obj = new Function("return " + jsonString)();
+        setVeri(obj);
+        localStorage.setItem("veri", JSON.stringify(obj));
+        alert("Veri başarıyla yüklendi ✅");
       } catch (err) {
-        alert("HATA: Dosya geçerli bir .js biçiminde değil veya JSON hatası içeriyor.");
+        alert("Yüklenen dosya geçerli bir .js veri dosyası değil ❌");
       }
     };
     reader.readAsText(file);
   };
 
   return (
-    <div className="card">
-      <label>Veri Dosyası Yükle (.js):</label>
-      <input type="file" accept=".js" onChange={handleFileChange} />
-    </div>
+    <label className="ikon-btn" title="Veri Yükle (.js)">
+      ⬆️
+      <input
+        type="file"
+        accept=".js"
+        onChange={handleUpload}
+        style={{ display: "none" }}
+      />
+    </label>
   );
 }
 
