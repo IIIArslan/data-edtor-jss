@@ -25,7 +25,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
         case 1: return "Yeni Okul";
         case 2: return "Yeni Şehir";
         case 3: return "Yeni Program";
-        case 4: return "Yeni Konaklama";
+        case 4: return "Aile Yanı";
         default: return "Yeni Alan";
       }
     })();
@@ -88,8 +88,17 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
           "Aile Yanı": [[1, 4, 200]]
         }
       };
+    } else if (yol.includes("programlar") && yol.at(-1) !== "konaklamalar") {
+      hedef["Yeni Program"] = {
+        ucretAraliklari: [[1, 4, 100]],
+        ozelDonemler: [["2025-01-01", "2025-01-15"]],
+        ozelDonemEkUcret: 50,
+        konaklamalar: {
+          "Aile Yanı": [[1, 4, 200]]
+        }
+      };
     } else if (yol.at(-1) === "konaklamalar") {
-      hedef[yeniAd] = [[1, 4, 300]];
+      hedef["Aile Yanı"] = [[1, 4, 200]];
     } else {
       hedef[yeniAd] = {};
     }
@@ -197,7 +206,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
 
   return (
     <div className="data-tree">
-      <button onClick={() => handleEkle([], "Ülke") } className="ulke-ekle">
+      <button onClick={() => handleEkle([], "Ülke")} className="ulke-ekle">
         <Plus size={16} style={{ marginRight: "0.3rem" }} /> Ülke Ekle
       </button>
       <div className="veri-agaci-scroll">{renderTree(veri)}</div>
