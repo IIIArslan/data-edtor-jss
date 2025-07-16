@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
   const guncelle = (yeniDeger) => {
@@ -8,18 +8,55 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
     setVeri(yeniVeri);
   };
 
-  if (!aktifVeri || typeof aktifVeri !== "object") {
+  if (aktifVeri === null || aktifVeri === undefined) {
     return <div className="editor-panel">Bir öğe seçin</div>;
+  }
+
+  // Eğer aktifVeri dizi ise (örneğin [ [1,4,200], [5,12,180] ])
+  if (Array.isArray(aktifVeri) && Array.isArray(aktifVeri[0])) {
+    const handleArrayChange = (index, subIndex, value) => {
+      const yeni = [...aktifVeri];
+      yeni[index][subIndex] = Number(value);
+      guncelle(yeni);
+    };
+
+    const handleArrayRemove = (index) => {
+      const yeni = [...aktifVeri];
+      yeni.splice(index, 1);
+      guncelle(yeni);
+    };
+
+    const handleArrayAdd = () => {
+      guncelle([...aktifVeri, [1, 4, 0]]);
+    };
+
+    return (
+      <div className="editor-panel">
+        <label>{aktifYol.at(-1)}</label>
+        {aktifVeri.map((aralik, i) => (
+          <div key={i} className="array-row">
+            {aralik.map((v, j) => (
+              <input
+                key={j}
+                type="number"
+                value={v}
+                onChange={(e) => handleArrayChange(i, j, e.target.value)}
+              />
+            ))}
+            <button onClick={() => handleArrayRemove(i)}>🗑️</button>
+          </div>
+        ))}
+        <button onClick={handleArrayAdd}>+ Ekle</button>
+      </div>
+    );
+  }
+
+  if (typeof aktifVeri !== "object") {
+    return <div className="editor-panel">Düzenlenebilir veri bulunamadı</div>;
   }
 
   const handleInput = (alan, deger) => {
     guncelle({ ...aktifVeri, [alan]: deger });
-  };
-
-  const handleArrayChange = (alan, index, key, deger) => {
-    const yeniListe = [...aktifVeri[alan]];
-    yeniListe[index][key] = deger;
-    guncelle({ ...aktifVeri, [alan]: yeniListe });
   };
 
   const handleArrayAdd = (alan, yeni) => {
@@ -30,12 +67,6 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
     const yeniListe = [...aktifVeri[alan]];
     yeniListe.splice(index, 1);
     guncelle({ ...aktifVeri, [alan]: yeniListe });
-  };
-
-  const handleProgramSecimi = (e) => {
-    const secilen = e.target.value;
-    const yol = [...aktifYol.slice(0, -1), secilen];
-    setAktifYol(yol);
   };
 
   return (
@@ -76,18 +107,6 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
             </div>
           ))}
           <button onClick={() => handleArrayAdd("ekHizmetler", { isim: "Yeni Hizmet", ucret: 0 })}>+ Ekle</button>
-        </div>
-      )}
-
-      {aktifVeri.programlar && (
-        <div>
-          <label>programlar</label>
-          <select onChange={handleProgramSecimi} defaultValue="">
-            <option disabled value="">Program Seçin</option>
-            {Object.keys(aktifVeri.programlar).map((k) => (
-              <option key={k} value={k}>{k}</option>
-            ))}
-          </select>
         </div>
       )}
 
@@ -142,51 +161,6 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
             </div>
           ))}
           <button onClick={() => handleArrayAdd("ozelDonemler", ["2025-01-01", "2025-01-15"])}>+ Ekle</button>
-        </div>
-      )}
-
-      {aktifVeri.konaklamalar && (
-        <div>
-          <label>konaklamalar</label>
-          {Object.entries(aktifVeri.konaklamalar).map(([tip, araliklar], i) => (
-            <div key={i}>
-              <input
-                value={tip}
-                onChange={(e) => {
-                  const yeni = { ...aktifVeri.konaklamalar };
-                  const yeniTip = e.target.value;
-                  yeni[yeniTip] = yeni[tip];
-                  delete yeni[tip];
-                  guncelle({ ...aktifVeri, konaklamalar: yeni });
-                }}
-              />
-              {araliklar.map((a, j) => (
-                <div key={j} className="array-row">
-                  {a.map((v, k) => (
-                    <input
-                      key={k}
-                      type="number"
-                      value={v}
-                      onChange={(e) => {
-                        const yeni = [...araliklar];
-                        yeni[j][k] = Number(e.target.value);
-                        const tum = { ...aktifVeri.konaklamalar, [tip]: yeni };
-                        guncelle({ ...aktifVeri, konaklamalar: tum });
-                      }}
-                    />
-                  ))}
-                  <button
-                    onClick={() => {
-                      const yeni = [...araliklar];
-                      yeni.splice(j, 1);
-                      const tum = { ...aktifVeri.konaklamalar, [tip]: yeni };
-                      guncelle({ ...aktifVeri, konaklamalar: tum });
-                    }}
-                  >🗑️</button>
-                </div>
-              ))}
-            </div>
-          ))}
         </div>
       )}
     </div>
