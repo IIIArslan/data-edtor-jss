@@ -88,6 +88,8 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
           "Aile Yanı": [[1, 4, 200]]
         }
       };
+    } else if (yol.at(-1) === "konaklamalar") {
+      hedef[yeniAd] = [[1, 4, 300]];
     } else {
       hedef[yeniAd] = {};
     }
