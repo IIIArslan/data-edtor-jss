@@ -9,7 +9,9 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   const toggleExpand = (yol) => {
     const yolStr = yol.join("/");
     setExpandedPaths((prev) =>
-      prev.includes(yolStr) ? prev.filter((p) => p !== yolStr) : [...prev, yolStr]
+      prev.includes(yolStr)
+        ? prev.filter((p) => p !== yolStr)
+        : [...prev, yolStr]
     );
   };
 
@@ -50,25 +52,24 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
                 ozelDonemler: [["2025-01-01", "2025-01-15"]],
                 ozelDonemEkUcret: 50,
                 konaklamalar: {
-                  "Aile Yanı": [[1, 4, 200]],
-                },
-              },
-            },
-          },
-        },
+                  "Aile Yanı": [[1, 4, 200]]
+                }
+              }
+            }
+          }
+        }
       };
     } else {
-      hedef[yeniAd] =
-        tip === "Program"
-          ? {
-              ucretAraliklari: [[1, 4, 100]],
-              ozelDonemler: [["2025-01-01", "2025-01-15"]],
-              ozelDonemEkUcret: 50,
-              konaklamalar: {
-                "Aile Yanı": [[1, 4, 200]],
-              },
+      hedef[yeniAd] = tip === "Program"
+        ? {
+            ucretAraliklari: [[1, 4, 100]],
+            ozelDonemler: [["2025-01-01", "2025-01-15"]],
+            ozelDonemEkUcret: 50,
+            konaklamalar: {
+              "Aile Yanı": [[1, 4, 200]]
             }
-          : {};
+          }
+        : {};
     }
 
     setVeri(yeniVeri);
@@ -113,8 +114,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
               style={{ cursor: "pointer", fontWeight: "bold", color: "#c24a00", flexGrow: 1 }}
               onClick={() => toggleExpand(yeniYol)}
             >
-              {isObject &&
-                (isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}{" "}
+              {isObject && (isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}{" "}
               {isEditingKey ? (
                 <input
                   type="text"
@@ -136,11 +136,15 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
                 </span>
               )}
             </div>
-
-            <button onClick={() => setEditingPath(yeniYol) || setEditingValue(key)}>
+            <button
+              className="ikon-sadece-btn"
+              onClick={() => {
+                setEditingPath(yeniYol);
+                setEditingValue(key);
+              }}
+            >
               <Pencil size={16} />
             </button>
-
             <button className="ikon-sadece-btn" onClick={() => handleEkle(yeniYol, Object.keys(val)[0] ? "Program" : "Alt")}>
               <Plus size={16} />
             </button>
@@ -149,9 +153,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
             </button>
           </div>
           {isExpanded && isObject && (
-            <div style={{ paddingLeft: "1rem" }}>
-              {renderTree(val, yeniYol)}
-            </div>
+            <div style={{ paddingLeft: "1rem" }}>{renderTree(val, yeniYol)}</div>
           )}
         </div>
       );
@@ -160,7 +162,7 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
 
   return (
     <div className="data-tree">
-      <button onClick={() => handleEkle([], "Ülke")} className="ulke-ekle">
+      <button onClick={() => handleEkle([], "Ülke"))} className="ulke-ekle">
         <Plus size={16} style={{ marginRight: "0.3rem" }} /> Ülke Ekle
       </button>
       <div className="veri-agaci-scroll">{renderTree(veri)}</div>
