@@ -1,182 +1,104 @@
 import React, { useState } from "react";
 
-function DataTree({ data, onDataChange }) {
-  const [selectedPath, setSelectedPath] = useState(null);
-  const [editingPath, setEditingPath] = useState(null);
-  const [editingValue, setEditingValue] = useState("");
+function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   const [expandedPaths, setExpandedPaths] = useState([]);
 
-  const isExpanded = (path) => expandedPaths.includes(path.join(" > "));
-
-  const toggleExpand = (path) => {
-    const pathKey = path.join(" > ");
+  const toggleExpand = (yol) => {
+    const yolStr = yol.join("/");
     setExpandedPaths((prev) =>
-      prev.includes(pathKey)
-        ? prev.filter((p) => p !== pathKey)
-        : [...prev, pathKey]
+      prev.includes(yolStr)
+        ? prev.filter((p) => p !== yolStr)
+        : [...prev, yolStr]
     );
   };
 
-  const handlePathSelect = (path) => {
-    setSelectedPath(path);
-    setEditingPath(null);
-  };
+  const handleSec = (yol) => setAktifYol(yol);
 
-  const handleEditChange = (e) => {
-    setEditingValue(e.target.value);
-  };
+  const handleEkle = (yol, tip) => {
+    const yeniVeri = { ...veri };
+    const hedef = yol.reduce((o, k) => (o[k] = o[k] || {}), yeniVeri);
+    const yeniAd = `Yeni ${tip}`;
 
-  const handleKeyEdit = (path, newKey) => {
-    const newData = { ...data };
-    let current = newData;
-    for (let i = 0; i < path.length - 1; i++) {
-      current = current[path[i]];
-    }
-    const oldKey = path[path.length - 1];
-    const value = current[oldKey];
-    delete current[oldKey];
-    current[newKey] = value;
-    onDataChange(newData);
-  };
-
-  const handleDelete = (path) => {
-    if (!window.confirm("Bu öğeyi silmek istediğinize emin misiniz?")) return;
-    const newData = { ...data };
-    let current = newData;
-    for (let i = 0; i < path.length - 1; i++) {
-      current = current[path[i]];
-    }
-    const keyToDelete = path[path.length - 1];
-    delete current[keyToDelete];
-    onDataChange(newData);
-  };
-
-  const handleAdd = (path) => {
-    const newData = { ...data };
-    let current = newData;
-    for (let key of path) {
-      if (!current[key]) current[key] = {};
-      current = current[key];
-    }
-
-    const level = path.length;
-    const defaultKeys = [
-      "Yeni Ülke",
-      "Yeni Okul",
-      "Yeni Şehir",
-      "Yeni Program"
-    ];
-    const defaultKey = defaultKeys[level] || "Yeni Alan";
-
-    const uniqueKey = Object.keys(current).includes(defaultKey)
-      ? `${defaultKey} ${Object.keys(current).length + 1}`
-      : defaultKey;
-
-    current[uniqueKey] =
-      level === 3
-        ? {
+    if (tip === "Ülke") {
+      yeniVeri[yeniAd] = {
+        "Yeni Okul": {
+          "Yeni Şehir": {
             paraBirimi: "birim",
-            ekHizmetler: [{ isim: "Ek hizmet", ucret: 0 }],
+            ekHizmetler: [{ isim: "Hizmet İsmi", ucret: 0 }],
             programlar: {
               "Yeni Program": {
-                ucretAraliklari: [[1, 4, 200]],
+                ucretAraliklari: [[1, 4, 100]],
                 ozelDonemler: [["2025-01-01", "2025-01-15"]],
                 ozelDonemEkUcret: 50,
                 konaklamalar: {
-                  "Aile Yanı": [[1, 4, 220]],
-                  "Yurt": [[1, 4, 240]]
+                  "Aile Yanı": [[1, 4, 200]]
                 }
               }
             }
           }
+        }
+      };
+    } else {
+      hedef[yeniAd] = tip === "Program"
+        ? {
+            ucretAraliklari: [[1, 4, 100]],
+            ozelDonemler: [["2025-01-01", "2025-01-15"]],
+            ozelDonemEkUcret: 50,
+            konaklamalar: {
+              "Aile Yanı": [[1, 4, 200]]
+            }
+          }
         : {};
-
-    onDataChange(newData);
-    setExpandedPaths((prev) => [...prev, path.join(" > ")]);
+    }
+    setVeri(yeniVeri);
+    setExpandedPaths((prev) => [...prev, yol.join("/")]);
   };
 
-  const renderTree = (obj, path = []) => {
-    return Object.entries(obj).map(([key, value]) => {
-      const newPath = [...path, key];
-      const isBranch =
-        typeof value === "object" && value !== null && !Array.isArray(value);
+  const handleSil = (yol) => {
+    if (!yol.length) return;
+    const yeniVeri = { ...veri };
+    const son = yol[yol.length - 1];
+    const ebeveyn = yol.slice(0, -1).reduce((o, k) => o?.[k], yeniVeri);
+    if (ebeveyn && ebeveyn[son]) delete ebeveyn[son];
+    setVeri(yeniVeri);
+    setAktifYol([]);
+  };
+
+  const renderTree = (obj, yol = []) => {
+    return Object.entries(obj).map(([key, val]) => {
+      const yeniYol = [...yol, key];
+      const isExpanded = expandedPaths.includes(yeniYol.join("/"));
+      const isActive = JSON.stringify(aktifYol) === JSON.stringify(yeniYol);
+      const isObject = typeof val === "object" && val !== null && !Array.isArray(val);
+
+      if (
+        arama &&
+        !yeniYol.join("/").toLowerCase().includes(arama.toLowerCase())
+      )
+        return null;
 
       return (
-        <div
-          key={newPath.join(" > ")}
-          style={{ marginLeft: path.length * 15, marginBottom: "5px" }}
-        >
+        <div key={yeniYol.join("/")} className="veri-satir">
           <div
             style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}
           >
             <div
-              style={{
-                cursor: "pointer",
-                fontWeight: "bold",
-                color: "#c24a00",
-                flexGrow: 1
-              }}
-              onClick={() => {
-                toggleExpand(newPath);
-                handlePathSelect(newPath);
-              }}
+              style={{ cursor: "pointer", fontWeight: "bold", color: "#c24a00", flexGrow: 1 }}
+              onClick={() => toggleExpand(yeniYol)}
             >
-              {isBranch ? (isExpanded(newPath) ? "▾" : "▸") : "•"}{" "}
-              {editingPath &&
-              editingPath.join(" > ") === newPath.join(" > ") ? (
-                <input
-                  type="text"
-                  value={editingValue}
-                  onChange={handleEditChange}
-                  onBlur={() => {
-                    handleKeyEdit(newPath, editingValue);
-                    setEditingPath(null);
-                  }}
-                  autoFocus
-                  style={{ fontSize: "0.9rem", padding: "2px 6px" }}
-                />
-              ) : (
-                key
-              )}
+              {isObject && (isExpanded ? "▼" : "▶")} {" "}
+              <span
+                onClick={() => handleSec(yeniYol)}
+                className={isActive ? "aktif-yol" : ""}
+              >
+                {key}
+              </span>
             </div>
-
-            {isBranch && (
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAdd(newPath);
-                  }}
-                  title="Alt eleman ekle"
-                >
-                  ＋
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(newPath);
-                  }}
-                  title="Bu öğeyi sil"
-                >
-                  ✖
-                </button>
-              </>
-            )}
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setEditingPath(newPath);
-                setEditingValue(key);
-              }}
-              title="Adı değiştir"
-            >
-              ✏
-            </button>
+            <button onClick={() => handleEkle(yeniYol, Object.keys(val)[0] ? "Program" : "Alt")}>+</button>
+            <button onClick={() => handleSil(yeniYol)}>🗑️</button>
           </div>
-
-          {isBranch && isExpanded(newPath) && (
-            <div>{renderTree(value, newPath)}</div>
+          {isExpanded && isObject && (
+            <div style={{ paddingLeft: "1rem" }}>{renderTree(val, yeniYol)}</div>
           )}
         </div>
       );
@@ -184,16 +106,13 @@ function DataTree({ data, onDataChange }) {
   };
 
   return (
-    <div style={{ marginTop: "1rem", marginLeft: "1rem" }}>
-      <h3 style={{ color: "#7a3e00" }}>📁 Veri Yapısı</h3>
-      <button
-        onClick={() => handleAdd([])}
-        style={{ marginBottom: "10px" }}
-        title="Yeni ülke ekle"
-      >
+    <div className="data-tree">
+      <button onClick={() => handleEkle([], "Ülke")} className="ulke-ekle">
         + Ülke Ekle
       </button>
-      {renderTree(data)}
+      <div className="veri-agaci-scroll">
+        {renderTree(veri)}
+      </div>
     </div>
   );
 }
