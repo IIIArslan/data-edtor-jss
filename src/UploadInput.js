@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Trash2, Pencil } from "lucide-react";
 
 function UploadInput({ setVeri }) {
   const [dosyaAdi, setDosyaAdi] = useState("");
@@ -43,8 +44,8 @@ function UploadInput({ setVeri }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-      <label className="ikon-btn" title="Veri Yükle (.js)">
-        ⬆️
+      <label className="buton-yukle" title="Veri Yükle (.js)">
+        data(.js) yükle
         <input
           type="file"
           accept=".js"
@@ -89,14 +90,14 @@ function UploadInput({ setVeri }) {
             title="Adı Düzenle"
             style={{ fontSize: "0.9rem", background: "none", border: "none", color: "#61dafb", cursor: "pointer" }}
           >
-            ✏️
+            <Pencil size={16} />
           </button>
           <button
             onClick={handleClear}
             title="Dosyayı Sıfırla"
             style={{ fontSize: "0.9rem", background: "none", border: "none", color: "#ff5252", cursor: "pointer" }}
           >
-            🗑️
+            <Trash2 size={16} />
           </button>
         </div>
       )}
