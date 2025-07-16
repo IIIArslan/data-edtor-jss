@@ -12,7 +12,6 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
     return <div className="editor-panel">Bir öğe seçin</div>;
   }
 
-  // Eğer aktifVeri dizi ise (örneğin [ [1,4,200], [5,12,180] ])
   if (Array.isArray(aktifVeri) && Array.isArray(aktifVeri[0])) {
     const handleArrayChange = (index, subIndex, value) => {
       const yeni = [...aktifVeri];
@@ -43,10 +42,10 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
                 onChange={(e) => handleArrayChange(i, j, e.target.value)}
               />
             ))}
-            <button onClick={() => handleArrayRemove(i)}>🗑️</button>
+            <button className="ikon-sadece-btn" onClick={() => handleArrayRemove(i)}>🗑️</button>
           </div>
         ))}
-        <button onClick={handleArrayAdd}>+ Ekle</button>
+        <button className="buton-ekle" onClick={handleArrayAdd}>+ Ekle</button>
       </div>
     );
   }
@@ -103,10 +102,10 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
                   guncelle({ ...aktifVeri, ekHizmetler: yeni });
                 }}
               />
-              <button onClick={() => handleArrayRemove("ekHizmetler", i)}>🗑️</button>
+              <button className="ikon-sadece-btn" onClick={() => handleArrayRemove("ekHizmetler", i)}>🗑️</button>
             </div>
           ))}
-          <button onClick={() => handleArrayAdd("ekHizmetler", { isim: "Yeni Hizmet", ucret: 0 })}>+ Ekle</button>
+          <button className="buton-ekle" onClick={() => handleArrayAdd("ekHizmetler", { isim: "Yeni Hizmet", ucret: 0 })}>+ Ekle</button>
         </div>
       )}
 
@@ -127,10 +126,10 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
                   }}
                 />
               ))}
-              <button onClick={() => handleArrayRemove("ucretAraliklari", i)}>🗑️</button>
+              <button className="ikon-sadece-btn" onClick={() => handleArrayRemove("ucretAraliklari", i)}>🗑️</button>
             </div>
           ))}
-          <button onClick={() => handleArrayAdd("ucretAraliklari", [1, 2, 0])}>+ Ekle</button>
+          <button className="buton-ekle" onClick={() => handleArrayAdd("ucretAraliklari", [1, 2, 0])}>+ Ekle</button>
         </div>
       )}
 
@@ -157,10 +156,10 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
                   guncelle({ ...aktifVeri, ozelDonemler: yeni });
                 }}
               />
-              <button onClick={() => handleArrayRemove("ozelDonemler", i)}>🗑️</button>
+              <button className="ikon-sadece-btn" onClick={() => handleArrayRemove("ozelDonemler", i)}>🗑️</button>
             </div>
           ))}
-          <button onClick={() => handleArrayAdd("ozelDonemler", ["2025-01-01", "2025-01-15"])}>+ Ekle</button>
+          <button className="buton-ekle" onClick={() => handleArrayAdd("ozelDonemler", ["2025-01-01", "2025-01-15"])}>+ Ekle</button>
         </div>
       )}
     </div>
