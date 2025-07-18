@@ -37,7 +37,13 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
 
   const guncelleKonaklama = (deger) => {
     const yeni = { ...aktifVeri };
-    yeni.programlar[secilenProgram].konaklamalar[secilenKonaklama] = deger;
+    yeni.programlar[secilenProgram].konaklamalar[secilenKonaklama].ucretAraliklari = deger;
+    guncelle(yeni);
+  };
+
+  const guncelleKonaklamaNot = (deger) => {
+    const yeni = { ...aktifVeri };
+    yeni.programlar[secilenProgram].konaklamalar[secilenKonaklama].konaklama_panel_not = deger;
     guncelle(yeni);
   };
 
@@ -75,10 +81,22 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
                   guncelle({ ...aktifVeri, ekHizmetler: yeni });
                 }}
               />
-              <button className="ikon-sadece-btn" onClick={() => handleArrayRemove("ekHizmetler", i)}>🗑️</button>
+              <button
+                className="ikon-sadece-btn"
+                onClick={() => handleArrayRemove("ekHizmetler", i)}
+              >
+                🗑️
+              </button>
             </div>
           ))}
-          <button className="buton-ekle" onClick={() => handleArrayAdd("ekHizmetler", { isim: "Yeni Hizmet", ucret: 0 })}>+ Ekle</button>
+          <button
+            className="buton-ekle"
+            onClick={() =>
+              handleArrayAdd("ekHizmetler", { isim: "Yeni Hizmet", ucret: 0 })
+            }
+          >
+            + Ekle
+          </button>
         </div>
       )}
 
@@ -94,7 +112,9 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
           >
             <option value="">Program seçin</option>
             {Object.keys(aktifVeri.programlar).map((p) => (
-              <option key={p} value={p}>{p}</option>
+              <option key={p} value={p}>
+                {p}
+              </option>
             ))}
           </select>
         </div>
@@ -118,17 +138,30 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
                     }}
                   />
                 ))}
-                <button className="ikon-sadece-btn" onClick={() => {
-                  const yeni = [...aktifVeri.programlar[secilenProgram].ucretAraliklari];
-                  yeni.splice(i, 1);
-                  guncelleAltAlan("programlar", "ucretAraliklari", yeni);
-                }}>🗑️</button>
+                <button
+                  className="ikon-sadece-btn"
+                  onClick={() => {
+                    const yeni = [...aktifVeri.programlar[secilenProgram].ucretAraliklari];
+                    yeni.splice(i, 1);
+                    guncelleAltAlan("programlar", "ucretAraliklari", yeni);
+                  }}
+                >
+                  🗑️
+                </button>
               </div>
             ))}
-            <button className="buton-ekle" onClick={() => {
-              const yeni = [...aktifVeri.programlar[secilenProgram].ucretAraliklari, [1, 2, 0]];
-              guncelleAltAlan("programlar", "ucretAraliklari", yeni);
-            }}>+ Ekle</button>
+            <button
+              className="buton-ekle"
+              onClick={() => {
+                const yeni = [
+                  ...aktifVeri.programlar[secilenProgram].ucretAraliklari,
+                  [1, 2, 0]
+                ];
+                guncelleAltAlan("programlar", "ucretAraliklari", yeni);
+              }}
+            >
+              + Ekle
+            </button>
           </div>
 
           <div>
@@ -153,25 +186,48 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
                     guncelleAltAlan("programlar", "ozelDonemler", yeni);
                   }}
                 />
-                <button className="ikon-sadece-btn" onClick={() => {
-                  const yeni = [...aktifVeri.programlar[secilenProgram].ozelDonemler];
-                  yeni.splice(i, 1);
-                  guncelleAltAlan("programlar", "ozelDonemler", yeni);
-                }}>🗑️</button>
+                <input
+                  type="number"
+                  value={donem[2]}
+                  onChange={(e) => {
+                    const yeni = [...aktifVeri.programlar[secilenProgram].ozelDonemler];
+                    yeni[i][2] = Number(e.target.value);
+                    guncelleAltAlan("programlar", "ozelDonemler", yeni);
+                  }}
+                />
+                <button
+                  className="ikon-sadece-btn"
+                  onClick={() => {
+                    const yeni = [...aktifVeri.programlar[secilenProgram].ozelDonemler];
+                    yeni.splice(i, 1);
+                    guncelleAltAlan("programlar", "ozelDonemler", yeni);
+                  }}
+                >
+                  🗑️
+                </button>
               </div>
             ))}
-            <button className="buton-ekle" onClick={() => {
-              const yeni = [...aktifVeri.programlar[secilenProgram].ozelDonemler, ["2025-01-01", "2025-01-15"]];
-              guncelleAltAlan("programlar", "ozelDonemler", yeni);
-            }}>+ Ekle</button>
+            <button
+              className="buton-ekle"
+              onClick={() => {
+                const yeni = [
+                  ...aktifVeri.programlar[secilenProgram].ozelDonemler,
+                  ["2025-01-01", "2025-01-15", 0]
+                ];
+                guncelleAltAlan("programlar", "ozelDonemler", yeni);
+              }}
+            >
+              + Ekle
+            </button>
           </div>
 
           <div>
-            <label>özelDönemEkÜcret</label>
-            <input
-              type="number"
-              value={aktifVeri.programlar[secilenProgram].ozelDonemEkUcret}
-              onChange={(e) => guncelleAltAlan("programlar", "ozelDonemEkUcret", Number(e.target.value))}
+            <label>Program Panel Notu</label>
+            <textarea
+              value={aktifVeri.programlar[secilenProgram].program_panel_not || ""}
+              onChange={(e) =>
+                guncelleAltAlan("programlar", "program_panel_not", e.target.value)
+              }
             />
           </div>
 
@@ -183,7 +239,9 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
             >
               <option value="">Konaklama seçin</option>
               {Object.keys(aktifVeri.programlar[secilenProgram].konaklamalar || {}).map((k) => (
-                <option key={k} value={k}>{k}</option>
+                <option key={k} value={k}>
+                  {k}
+                </option>
               ))}
             </select>
           </div>
@@ -191,7 +249,7 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
           {secilenKonaklama && (
             <div>
               <label>{secilenKonaklama} Ücret Aralıkları</label>
-              {(aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama] || []).map((aralik, i) => (
+              {(aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama].ucretAraliklari || []).map((aralik, i) => (
                 <div key={i} className="array-row">
                   {aralik.map((v, j) => (
                     <input
@@ -199,23 +257,50 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
                       type="number"
                       value={v}
                       onChange={(e) => {
-                        const yeni = [...aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama]];
+                        const yeni = [
+                          ...aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama].ucretAraliklari
+                        ];
                         yeni[i][j] = Number(e.target.value);
                         guncelleKonaklama(yeni);
                       }}
                     />
                   ))}
-                  <button className="ikon-sadece-btn" onClick={() => {
-                    const yeni = [...aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama]];
-                    yeni.splice(i, 1);
-                    guncelleKonaklama(yeni);
-                  }}>🗑️</button>
+                  <button
+                    className="ikon-sadece-btn"
+                    onClick={() => {
+                      const yeni = [
+                        ...aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama].ucretAraliklari
+                      ];
+                      yeni.splice(i, 1);
+                      guncelleKonaklama(yeni);
+                    }}
+                  >
+                    🗑️
+                  </button>
                 </div>
               ))}
-              <button className="buton-ekle" onClick={() => {
-                const yeni = [...(aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama] || []), [1, 4, 0]];
-                guncelleKonaklama(yeni);
-              }}>+ Ekle</button>
+              <button
+                className="buton-ekle"
+                onClick={() => {
+                  const yeni = [
+                    ...(aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama].ucretAraliklari || []),
+                    [1, 4, 0]
+                  ];
+                  guncelleKonaklama(yeni);
+                }}
+              >
+                + Ekle
+              </button>
+
+              <div>
+                <label>Konaklama Panel Notu</label>
+                <textarea
+                  value={
+                    aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama].konaklama_panel_not || ""
+                  }
+                  onChange={(e) => guncelleKonaklamaNot(e.target.value)}
+                />
+              </div>
             </div>
           )}
         </>
