@@ -5,7 +5,6 @@ import DownloadButton from "./DownloadButton";
 import UploadInput from "./UploadInput";
 import SearchBox from "./SearchBox";
 import { Moon, Sun } from "lucide-react";
-import { genisVeri } from "./data"; // Yeni data.js import
 import "./App.css";
 
 function App() {
