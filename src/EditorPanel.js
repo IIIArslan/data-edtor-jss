@@ -224,6 +224,7 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
           <div>
             <label>Program Panel Notu</label>
             <textarea
+              className="textarea-not"
               value={aktifVeri.programlar[secilenProgram].program_panel_not || ""}
               onChange={(e) =>
                 guncelleAltAlan("programlar", "program_panel_not", e.target.value)
@@ -295,6 +296,7 @@ function EditorPanel({ veri, setVeri, aktifYol, aktifVeri }) {
               <div>
                 <label>Konaklama Panel Notu</label>
                 <textarea
+                  className="textarea-not"
                   value={
                     aktifVeri.programlar[secilenProgram].konaklamalar[secilenKonaklama].konaklama_panel_not || ""
                   }
