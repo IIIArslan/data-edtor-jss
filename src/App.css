@@ -243,3 +243,23 @@ body {
   display: none;
 }
 
+.textarea-not {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--fg);
+  resize: vertical;
+  line-height: 1.4;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.textarea-not:focus {
+  border-color: var(--active);
+  box-shadow: 0 0 4px var(--active);
+  outline: none;
+}
+
