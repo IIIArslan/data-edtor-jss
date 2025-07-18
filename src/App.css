@@ -1,4 +1,3 @@
-
 body {
   margin: 0;
   font-family: sans-serif;
@@ -113,8 +112,23 @@ body {
   background-color: #1976d2;
 }
 
+/* ARAMA ALANI */
+.arama-kapsayici {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.arama-ikon {
+  position: absolute;
+  left: 8px;
+  color: var(--fg);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .arama-kutusu {
-  padding: 0.4rem 0.7rem;
+  padding: 0.4rem 0.7rem 0.4rem 2rem; /* ikon için padding eklendi */
   font-size: 1rem;
   background: var(--input-bg);
   border: 1px solid var(--border);
@@ -219,20 +233,19 @@ body {
 .veri-agaci-scroll {
   max-height: calc(100vh - 120px);
   overflow-y: auto;
-
-  scrollbar-width: none;            
-  -ms-overflow-style: none;         
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .veri-agaci-scroll::-webkit-scrollbar {
-  display: none;                     
+  display: none;
 }
 
 .ana-icerik {
-  scrollbar-width: none;        
-  -ms-overflow-style: none;     
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .ana-icerik::-webkit-scrollbar {
-  display: none;                
+  display: none;
 }
 
 .data-tree {
@@ -262,4 +275,3 @@ body {
   box-shadow: 0 0 4px var(--active);
   outline: none;
 }
-
