@@ -5,12 +5,13 @@ import DownloadButton from "./DownloadButton";
 import UploadInput from "./UploadInput";
 import SearchBox from "./SearchBox";
 import { Moon, Sun } from "lucide-react";
+import { genisVeri } from "./data"; // Yeni data.js import
 import "./App.css";
 
 function App() {
   const [veri, setVeri] = useState(() => {
     const localData = localStorage.getItem("veri");
-    return localData ? JSON.parse(localData) : {};
+    return localData ? JSON.parse(localData) : genisVeri; // İlk yüklemede genisVeri kullanılıyor
   });
 
   const [aktifYol, setAktifYol] = useState([]);
