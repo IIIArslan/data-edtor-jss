@@ -6,14 +6,17 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
   const [editingPath, setEditingPath] = useState(null);
   const [editingValue, setEditingValue] = useState("");
 
+  // Sabit alanlar (silinemez ve ismi değiştirilemez)
   const sabitAlanlar = [
     "paraBirimi",
     "ekHizmetler",
     "ucretAraliklari",
     "ozelDonemler",
-    "ozelDonemEkUcret"
+    "program_panel_not",
+    "konaklama_panel_not"
   ];
 
+  // Her seviye için renk
   const getRenkForPath = (yol, key) => {
     const len = yol.length;
 
@@ -23,10 +26,11 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
 
     if (["paraBirimi", "ekHizmetler", "programlar"].includes(key)) return "#FF7F7F"; // Sabit
 
-    if (["ucretAraliklari", "ozelDonemler", "ozelDonemEkUcret", "konaklamalar"].includes(key))
+    if (["ucretAraliklari", "ozelDonemler", "program_panel_not", "konaklamalar"].includes(key))
       return "#C8A2C8"; // Program altı
 
-    if (yol.includes("konaklamalar") && key !== "konaklamalar") return "#F2E394"; // Konaklama içeriği
+    if (yol.includes("konaklamalar") && key !== "konaklamalar")
+      return "#F2E394"; // Konaklama içeriği
 
     return "#c24a00";
   };
@@ -76,16 +80,22 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
       hedef[yeniAd] = getProgramSablonu();
     } else if (tip === "Konaklama") {
       yeniAd = getYeniAd(hedef, "Yeni Konaklama");
-      hedef[yeniAd] = [[1, 4, 200]];
+      hedef[yeniAd] = {
+        ucretAraliklari: [[1, 4, 200]],
+        konaklama_panel_not: ""
+      };
     } else {
       yeniAd = getYeniAd(hedef, "Yeni Alan");
       hedef[yeniAd] = {};
     }
 
     setVeri(yeniVeri);
-    setExpandedPaths((prev) => [...new Set([...prev, yol.join("/"), [...yol, yeniAd].join("/")])]);
+    setExpandedPaths((prev) => [
+      ...new Set([...prev, yol.join("/"), [...yol, yeniAd].join("/")])
+    ]);
   };
 
+  // Yeni şehir şablonu
   const getSehirSablonu = () => ({
     paraBirimi: "birim",
     ekHizmetler: [{ isim: "Havaalanı Transferi", ucret: 50 }],
@@ -94,12 +104,16 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
     }
   });
 
+  // Yeni program şablonu
   const getProgramSablonu = () => ({
     ucretAraliklari: [[1, 4, 100]],
-    ozelDonemler: [["2025-01-01", "2025-01-15"]],
-    ozelDonemEkUcret: 50,
+    ozelDonemler: [["2025-01-01", "2025-01-15", 20]], // Artık [baslangic, bitis, ucret] formatı
+    program_panel_not: "",
     konaklamalar: {
-      "Yeni Konaklama": [[1, 4, 200]]
+      "Yeni Konaklama": {
+        ucretAraliklari: [[1, 4, 200]],
+        konaklama_panel_not: ""
+      }
     }
   });
 
@@ -135,19 +149,18 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
       const isObject = typeof val === "object" && val !== null && !Array.isArray(val);
       const isEditingKey = editingPath && JSON.stringify(editingPath) === JSON.stringify(yeniYol);
 
-      if (arama && !yeniYol.join("/").toLowerCase().includes(arama.toLowerCase())) return null;
+      if (arama && !yeniYol.join("/").toLowerCase().includes(arama.toLowerCase()))
+        return null;
 
       const isSabitAlan = sabitAlanlar.includes(key);
-
       const showAdd =
-        (yeniYol.at(-1) === "konaklamalar") ||
-        (yeniYol.at(-1) === "programlar") ||
-        (yeniYol.length === 0) ||
-        (yeniYol.length === 1) ||
-        (yeniYol.length === 2);
+        yeniYol.at(-1) === "konaklamalar" ||
+        yeniYol.at(-1) === "programlar" ||
+        yeniYol.length === 0 ||
+        yeniYol.length === 1 ||
+        yeniYol.length === 2;
 
       const showEditDelete = !isSabitAlan;
-
       const renk = getRenkForPath(yeniYol, key);
 
       return (
@@ -184,13 +197,19 @@ function DataTree({ veri, setVeri, aktifYol, setAktifYol, arama }) {
             </div>
             {showEditDelete && (
               <>
-                <button className="ikon-sadece-btn" onClick={() => {
-                  setEditingPath(yeniYol);
-                  setEditingValue(key);
-                }}>
+                <button
+                  className="ikon-sadece-btn"
+                  onClick={() => {
+                    setEditingPath(yeniYol);
+                    setEditingValue(key);
+                  }}
+                >
                   <Pencil size={16} />
                 </button>
-                <button className="ikon-sadece-btn" onClick={() => handleSil(yeniYol)}>
+                <button
+                  className="ikon-sadece-btn"
+                  onClick={() => handleSil(yeniYol)}
+                >
                   <Trash2 size={16} />
                 </button>
               </>
